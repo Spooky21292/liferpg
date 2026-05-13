@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+venv/
+*.db
+uploads/
+
+# Node
+node_modules/
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+
+# Logs
+*.log
+/tmp/

@@ -1,0 +1,155 @@
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+.login-bg-effects {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.4;
+}
+
+.orb-1 {
+  width: 300px;
+  height: 300px;
+  background: var(--primary);
+  top: -100px;
+  left: -100px;
+  animation: float 6s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 200px;
+  height: 200px;
+  background: var(--secondary);
+  bottom: -50px;
+  right: -50px;
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+.orb-3 {
+  width: 150px;
+  height: 150px;
+  background: var(--gold);
+  top: 50%;
+  left: 50%;
+  animation: float 7s ease-in-out infinite;
+}
+
+.login-content {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 380px;
+}
+
+.login-logo {
+  margin-bottom: 16px;
+}
+
+.logo-emoji {
+  font-size: 64px;
+  display: inline-block;
+}
+
+.login-title {
+  font-size: 28px;
+  color: var(--primary);
+  margin-bottom: 8px;
+  letter-spacing: 4px;
+}
+
+.login-subtitle {
+  color: var(--text-muted);
+  font-size: 16px;
+  margin-bottom: 40px;
+  font-weight: 300;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.input-group {
+  position: relative;
+}
+
+.login-input {
+  width: 100%;
+  padding: 16px 20px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  color: var(--text);
+  font-size: 16px;
+  outline: none;
+  transition: all 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.login-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px var(--primary-glow);
+}
+
+.login-input::placeholder {
+  color: var(--text-muted);
+}
+
+.login-btn {
+  padding: 16px;
+  background: linear-gradient(135deg, var(--primary), #9333ea);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.login-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px var(--primary-glow);
+}
+
+.login-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.login-features {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.feature span:first-child {
+  font-size: 24px;
+}

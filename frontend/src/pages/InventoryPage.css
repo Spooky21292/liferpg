@@ -1,0 +1,164 @@
+.inventory-page {
+  padding: 16px;
+}
+
+.inv-title {
+  font-size: 22px;
+  margin-bottom: 16px;
+}
+
+.inv-message {
+  padding: 10px 16px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  animation: fadeIn 0.3s;
+}
+
+.inv-message.success {
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: var(--green);
+}
+
+.inv-message.error {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--red);
+}
+
+/* Equipped Section */
+.equipped-section {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.section-label {
+  font-size: 14px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.equipped-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.equipped-slot {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: rgba(124, 58, 237, 0.05);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.slot-icon {
+  font-size: 20px;
+}
+
+.slot-name {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Groups */
+.inv-group {
+  margin-bottom: 16px;
+}
+
+.group-label {
+  font-size: 15px;
+  margin-bottom: 10px;
+  color: var(--text-muted);
+}
+
+.inv-items {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inv-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  transition: all 0.2s;
+}
+
+.inv-item.is-equipped {
+  background: rgba(124, 58, 237, 0.08);
+  border-color: rgba(124, 58, 237, 0.3);
+}
+
+.inv-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.inv-item-name {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.inv-item-rarity {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.equipped-badge-small {
+  font-size: 12px;
+  color: var(--primary);
+  font-weight: 600;
+  padding: 4px 10px;
+  background: rgba(124, 58, 237, 0.1);
+  border-radius: 8px;
+}
+
+.equip-btn {
+  padding: 6px 14px;
+  background: var(--bg-card-hover);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.equip-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+/* Empty State */
+.empty-inventory {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-muted);
+}
+
+.empty-inventory span {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.empty-hint {
+  font-size: 13px;
+  margin-top: 4px;
+  opacity: 0.7;
+}
