@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import './LoginScreen.css'
 
-function LoginScreen({ onLogin, loading }) {
+const GOOGLE_CLIENT_ID = '855103585243-fqcdk0a5ces4i1b1gfd1vafvhlcrmpcu.apps.googleusercontent.com'
+
+function LoginScreen({ onLogin, onAuthLogin, loading }) {
   const [username, setUsername] = useState('')
 
   const handleSubmit = (e) => {
@@ -9,11 +11,54 @@ function LoginScreen({ onLogin, loading }) {
     if (username.trim()) onLogin(username.trim())
   }
 
+  const handleGoogleResponse = useCallback(async (response) => {
+    if (response.credential) {
+      onAuthLogin('google', response.credential)
+    }
+  }, [onAuthLogin])
+
+  useEffect(() => {
+    const script = document.createElement('script')
+    script.src = 'https://accounts.google.com/gsi/client'
+    script.async = true
+    script.defer = true
+    script.onload = () => {
+      window.google?.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleResponse,
+      })
+      window.google?.accounts.id.renderButton(
+        document.getElementById('google-btn'),
+        {
+          type: 'standard',
+          theme: 'filled_black',
+          size: 'large',
+          width: 320,
+          text: 'continue_with',
+          shape: 'rectangular',
+          locale: 'ru',
+        }
+      )
+    }
+    document.head.appendChild(script)
+    return () => {
+      document.head.removeChild(script)
+    }
+  }, [handleGoogleResponse])
+
   return (
     <div className="login">
       <div className="login-content animate-in">
         <h1 className="login-title">LifeRPG</h1>
         <p className="login-sub">Прокачай себя в реальной жизни</p>
+
+        <div className="login-auth">
+          <div id="google-btn" className="google-btn-wrap"></div>
+        </div>
+
+        <div className="login-divider">
+          <span>или</span>
+        </div>
 
         <form className="login-form" onSubmit={handleSubmit}>
           <input
@@ -22,7 +67,6 @@ function LoginScreen({ onLogin, loading }) {
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             className="input"
-            autoFocus
             maxLength={30}
           />
           <button type="submit" className="btn" disabled={!username.trim() || loading}>

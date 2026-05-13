@@ -5,6 +5,8 @@ from pathlib import Path
 from typing import List
 
 import httpx
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -33,6 +35,7 @@ UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 XP_PER_LEVEL = 200
+GOOGLE_CLIENT_ID = "855103585243-fqcdk0a5ces4i1b1gfd1vafvhlcrmpcu.apps.googleusercontent.com"
 
 
 def calculate_level(xp: int) -> int:
@@ -102,6 +105,79 @@ def user_to_dict(user: User) -> dict:
         "current_quest_index": user.current_quest_index,
         "streak_days": user.streak_days,
     }
+
+
+# --- Auth endpoints ---
+
+class GoogleAuthRequest(BaseModel):
+    credential: str
+
+
+@app.post("/api/auth/google")
+def google_auth(req: GoogleAuthRequest, db: Session = Depends(get_db)):
+    try:
+        idinfo = id_token.verify_oauth2_token(
+            req.credential, google_requests.Request(), GOOGLE_CLIENT_ID
+        )
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    google_id = idinfo["sub"]
+    email = idinfo.get("email", "")
+    name = idinfo.get("name", email.split("@")[0])
+
+    user = db.query(User).filter(User.google_id == google_id).first()
+    if user:
+        return user_to_dict(user)
+
+    if email:
+        user = db.query(User).filter(User.email == email).first()
+        if user:
+            user.google_id = google_id
+            db.commit()
+            return user_to_dict(user)
+
+    username = name.replace(" ", "_")[:30]
+    base = username
+    counter = 1
+    while db.query(User).filter(User.username == username).first():
+        username = f"{base}_{counter}"
+        counter += 1
+
+    user = User(username=username, email=email, google_id=google_id)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user_to_dict(user)
+
+
+class TelegramAuthRequest(BaseModel):
+    id: int
+    first_name: str
+    username: str = ""
+    hash: str
+
+
+@app.post("/api/auth/telegram")
+def telegram_auth(req: TelegramAuthRequest, db: Session = Depends(get_db)):
+    telegram_id = str(req.id)
+
+    user = db.query(User).filter(User.telegram_id == telegram_id).first()
+    if user:
+        return user_to_dict(user)
+
+    username = (req.username or req.first_name).replace(" ", "_")[:30]
+    base = username
+    counter = 1
+    while db.query(User).filter(User.username == username).first():
+        username = f"{base}_{counter}"
+        counter += 1
+
+    user = User(username=username, telegram_id=telegram_id)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user_to_dict(user)
 
 
 # --- Quest endpoints ---

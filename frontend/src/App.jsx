@@ -28,6 +28,27 @@ function App() {
       const data = await res.json()
       setUser(data)
       localStorage.setItem('liferpg_username', username)
+      localStorage.setItem('liferpg_auth', 'username')
+    } catch (err) {
+      console.error(err)
+    }
+    setLoading(false)
+  }
+
+  const authLogin = async (provider, credential) => {
+    setLoading(true)
+    try {
+      const res = await fetch(`${API}/auth/${provider}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(provider === 'google' ? { credential } : credential),
+      })
+      const data = await res.json()
+      if (data.username) {
+        setUser(data)
+        localStorage.setItem('liferpg_username', data.username)
+        localStorage.setItem('liferpg_auth', provider)
+      }
     } catch (err) {
       console.error(err)
     }
@@ -50,7 +71,7 @@ function App() {
     if (saved) loginOrRegister(saved)
   }, [])
 
-  if (!user) return <LoginScreen onLogin={loginOrRegister} loading={loading} />
+  if (!user) return <LoginScreen onLogin={loginOrRegister} onAuthLogin={authLogin} loading={loading} />
 
   return (
     <div>

@@ -10,6 +10,9 @@ class User(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String(50), unique=True, index=True, nullable=False)
+    email = Column(String(200), default=None)
+    google_id = Column(String(200), default=None, index=True)
+    telegram_id = Column(String(50), default=None, index=True)
     avatar_name = Column(String(100), default="Новичок")
     level = Column(Integer, default=1)
     xp = Column(Integer, default=0)
