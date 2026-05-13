@@ -3,6 +3,7 @@ import LoginScreen from './pages/LoginScreen'
 import Dashboard from './pages/Dashboard'
 import QuestPage from './pages/QuestPage'
 import TasksPage from './pages/TasksPage'
+import CoachPage from './pages/CoachPage'
 import HistoryPage from './pages/HistoryPage'
 import NavBar from './components/NavBar'
 import './App.css'
@@ -52,6 +53,7 @@ function App() {
       {page === 'dashboard' && <Dashboard user={user} onNavigate={setPage} />}
       {page === 'quest' && <QuestPage user={user} setUser={setUser} refreshUser={refreshUser} />}
       {page === 'tasks' && <TasksPage user={user} />}
+      {page === 'coach' && <CoachPage user={user} />}
       {page === 'history' && <HistoryPage user={user} />}
       <NavBar currentPage={page} onNavigate={setPage} />
     </div>

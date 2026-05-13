@@ -2,11 +2,14 @@ import os
 import random
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import List
 
+import httpx
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from database import Base, engine, get_db
@@ -515,6 +518,90 @@ def get_history(username: str, db: Session = Depends(get_db)):
         }
         for t in tasks
     ]
+
+
+# --- AI Coach endpoint ---
+
+GENAPI_KEY = os.getenv("GENAPI_KEY", "")
+COACH_URL = "https://proxy.gen-api.ru/v1/chat/completions"
+COACH_MODEL = "gemini-2-5-flash-lite"
+
+STAT_LABELS = {
+    "strength": "Сила",
+    "intelligence": "Интеллект",
+    "creativity": "Креативность",
+    "discipline": "Дисциплина",
+    "social": "Социальность",
+}
+
+
+class ChatMessage(BaseModel):
+    role: str
+    content: str
+
+
+class CoachRequest(BaseModel):
+    messages: List[ChatMessage]
+
+
+@app.post("/api/users/{username}/coach")
+async def coach_chat(username: str, req: CoachRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    if not GENAPI_KEY:
+        return {"reply": "API ключ не настроен."}
+
+    level = calculate_level(user.xp)
+    stats_text = ", ".join(f"{STAT_LABELS[k]}: {v}" for k, v in {
+        "strength": user.strength,
+        "intelligence": user.intelligence,
+        "creativity": user.creativity,
+        "discipline": user.discipline,
+        "social": user.social,
+    }.items())
+
+    system_prompt = f"""Ты — строгий но мудрый наставник в RPG-игре "LifeRPG". Ты говоришь коротко, по делу, в стиле RPG-мастера.
+
+Данные героя:
+- Уровень: {level}
+- XP: {user.xp}
+- Серия дней: {user.streak_days}
+- Статы: {stats_text}
+
+Правила:
+- Отвечай на русском
+- Будь строгим но справедливым
+- Если жалуются на лень — не жалей, мотивируй жёстко
+- Предлагай конкретные действия на ближайшие 10-30 минут
+- Используй RPG-метафоры (квесты, прокачка, босс-лень и тд)
+- Отвечай коротко: 2-4 предложения максимум
+- Если просят совет — смотри на слабые статы и предлагай задачи для них"""
+
+    messages = [{"role": "system", "content": system_prompt}]
+    for m in req.messages[-10:]:
+        messages.append({"role": m.role, "content": m.content})
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            resp = await client.post(
+                COACH_URL,
+                json={"model": COACH_MODEL, "messages": messages, "max_tokens": 200},
+                headers={
+                    "Authorization": f"Bearer {GENAPI_KEY}",
+                    "Content-Type": "application/json",
+                },
+            )
+            data = resp.json()
+            choices = data.get("choices", [])
+            if choices:
+                reply = choices[0].get("message", {}).get("content", "")
+                if reply:
+                    return {"reply": reply.strip()}
+            return {"reply": "Наставник молчит... Попробуй ещё раз."}
+    except Exception as e:
+        return {"reply": f"Ошибка связи: {str(e)}"}
 
 
 # --- Serve frontend static files ---

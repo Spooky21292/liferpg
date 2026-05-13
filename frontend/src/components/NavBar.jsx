@@ -4,6 +4,7 @@ const tabs = [
   { id: 'dashboard', label: 'Герой' },
   { id: 'quest', label: 'Квест' },
   { id: 'tasks', label: 'Задачи' },
+  { id: 'coach', label: 'Коуч' },
   { id: 'history', label: 'История' },
 ]
 
