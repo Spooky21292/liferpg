@@ -3,15 +3,58 @@ import './CoachPage.css'
 
 const API = '/api'
 
+const STAT_NAMES = {
+  strength: 'Сила',
+  intelligence: 'Интеллект',
+  creativity: 'Креативность',
+  discipline: 'Дисциплина',
+  social: 'Социальность',
+}
+
+function toLocalDate(d) {
+  return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
+}
+
+function parseMessage(text) {
+  const parts = []
+  const taskRegex = /\[TASK:([^|]+)\|([^\]]+)\]/g
+  let lastIndex = 0
+  let match
+
+  while ((match = taskRegex.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push({ type: 'text', content: text.slice(lastIndex, match.index) })
+    }
+    parts.push({ type: 'task', title: match[1].trim(), stat: match[2].trim() })
+    lastIndex = match.index + match[0].length
+  }
+
+  if (lastIndex < text.length) {
+    parts.push({ type: 'text', content: text.slice(lastIndex) })
+  }
+
+  return parts
+}
+
+function renderText(text) {
+  return text.split(/(\*\*[^*]+\*\*)/).map((seg, i) => {
+    if (seg.startsWith('**') && seg.endsWith('**')) {
+      return <strong key={i}>{seg.slice(2, -2)}</strong>
+    }
+    return seg
+  })
+}
+
 function CoachPage({ user, messages, setMessages }) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
+  const [addedTasks, setAddedTasks] = useState({})
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, loading])
 
   const send = async () => {
     const text = input.trim()
@@ -26,7 +69,11 @@ function CoachPage({ user, messages, setMessages }) {
       const res = await fetch(`${API}/users/${encodeURIComponent(user.username)}/coach`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: newMessages.filter(m => m.role !== 'assistant' || newMessages.indexOf(m) > 0).map(m => ({ role: m.role, content: m.content })) }),
+        body: JSON.stringify({
+          messages: newMessages
+            .filter((m, idx) => !(m.role === 'assistant' && idx === 0))
+            .map(m => ({ role: m.role, content: m.content }))
+        }),
       })
       const data = await res.json()
       setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
@@ -35,6 +82,28 @@ function CoachPage({ user, messages, setMessages }) {
     }
     setLoading(false)
     inputRef.current?.focus()
+  }
+
+  const addTask = async (title, stat) => {
+    const key = `${title}_${stat}`
+    if (addedTasks[key]) return
+
+    const today = toLocalDate(new Date())
+    const form = new FormData()
+    form.append('title', title)
+    form.append('stat', stat)
+    form.append('xp', '50')
+    form.append('scheduled_date', today)
+
+    try {
+      await fetch(`${API}/users/${encodeURIComponent(user.username)}/tasks`, {
+        method: 'POST',
+        body: form,
+      })
+      setAddedTasks(prev => ({ ...prev, [key]: true }))
+    } catch (err) {
+      console.error(err)
+    }
   }
 
   const handleKey = (e) => {
@@ -52,11 +121,42 @@ function CoachPage({ user, messages, setMessages }) {
       </div>
 
       <div className="chat-area">
-        {messages.map((m, i) => (
-          <div key={i} className={`msg ${m.role}`}>
-            <div className="msg-bubble">{m.content}</div>
-          </div>
-        ))}
+        {messages.map((m, i) => {
+          const parts = m.role === 'assistant' ? parseMessage(m.content) : null
+
+          return (
+            <div key={i} className={`msg ${m.role}`}>
+              {m.role === 'user' ? (
+                <div className="msg-bubble">{m.content}</div>
+              ) : (
+                <div className="msg-bubble">
+                  {parts.map((p, j) => {
+                    if (p.type === 'text') {
+                      return <span key={j}>{renderText(p.content)}</span>
+                    }
+                    const key = `${p.title}_${p.stat}`
+                    const added = addedTasks[key]
+                    return (
+                      <div key={j} className="task-suggest">
+                        <div className="task-suggest-info">
+                          <span className="task-suggest-title">{p.title}</span>
+                          <span className="task-suggest-stat mono">{STAT_NAMES[p.stat] || p.stat}</span>
+                        </div>
+                        <button
+                          className={`task-suggest-btn ${added ? 'added' : ''}`}
+                          onClick={() => addTask(p.title, p.stat)}
+                          disabled={added}
+                        >
+                          {added ? 'Добавлено' : '+ Задача'}
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })}
         {loading && (
           <div className="msg assistant">
             <div className="msg-bubble typing">...</div>

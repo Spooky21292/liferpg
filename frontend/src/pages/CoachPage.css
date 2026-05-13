@@ -127,3 +127,62 @@
   opacity: 0.3;
   cursor: not-allowed;
 }
+
+/* Task suggestion cards */
+.task-suggest {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.task-suggest-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.task-suggest-title {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.task-suggest-stat {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+.task-suggest-btn {
+  flex-shrink: 0;
+  padding: 6px 12px;
+  background: var(--text);
+  border: none;
+  border-radius: 6px;
+  color: var(--bg);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.task-suggest-btn:hover:not(:disabled) {
+  opacity: 0.85;
+}
+
+.task-suggest-btn.added {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  cursor: default;
+}
+
+.msg-bubble strong {
+  font-weight: 600;
+}
