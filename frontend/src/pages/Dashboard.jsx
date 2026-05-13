@@ -1,11 +1,11 @@
 import './Dashboard.css'
 
 const STATS = [
-  { key: 'strength', name: 'Сила' },
-  { key: 'intelligence', name: 'Интеллект' },
-  { key: 'creativity', name: 'Креативность' },
-  { key: 'discipline', name: 'Дисциплина' },
-  { key: 'social', name: 'Социальность' },
+  { key: 'strength', name: 'Сила', icon: '⚡' },
+  { key: 'intelligence', name: 'Интеллект', icon: '◎' },
+  { key: 'creativity', name: 'Креативность', icon: '✦' },
+  { key: 'discipline', name: 'Дисциплина', icon: '→' },
+  { key: 'social', name: 'Социальность', icon: '◈' },
 ]
 
 function Dashboard({ user, onNavigate, onLogout }) {
@@ -36,12 +36,15 @@ function Dashboard({ user, onNavigate, onLogout }) {
       </div>
 
       {/* Stats */}
-      <div className="stats">
-        {STATS.map(({ key, name }) => (
+      <div className="stats-card">
+        {STATS.map(({ key, name, icon }, i) => (
           <div className="stat-row" key={key}>
-            <span className="stat-name">{name}</span>
-            <div className="stat-right">
-              <span className="stat-val mono">{user.stats[key]}</span>
+            <span className="stat-icon">{icon}</span>
+            <div className="stat-info">
+              <div className="stat-top">
+                <span className="stat-name">{name}</span>
+                <span className="stat-val mono">{user.stats[key]}</span>
+              </div>
               <div className="stat-track">
                 <div
                   className="stat-bar"
