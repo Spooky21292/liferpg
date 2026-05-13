@@ -1,14 +1,16 @@
 import os
 import random
 from datetime import datetime, timezone
+from pathlib import Path
 
 from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 
 from database import Base, engine, get_db
-from models import User, CompletedTask, InventoryItem
+from models import User, CompletedTask, InventoryItem, UserTask
 from quest_data import CHAPTERS, SHOP_ITEMS, LOOT_TABLE
 from ai_verifier import verify_task_photo
 
@@ -112,24 +114,52 @@ def get_current_quest(username: str, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
 
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    today_tasks = db.query(UserTask).filter(
+        UserTask.user_id == user.id,
+        UserTask.scheduled_date == today,
+        UserTask.is_completed == False,
+    ).all()
+
+    user_quests = [
+        {
+            "id": f"user_{t.id}",
+            "title": t.title,
+            "description": t.description or t.title,
+            "stat": t.stat,
+            "xp": t.xp,
+            "coins": 10,
+            "verification_prompt": f"Пользователь должен показать фото, подтверждающее выполнение задачи: {t.title}",
+            "is_user_task": True,
+        }
+        for t in today_tasks
+    ]
+
+    story_quest = None
+    chapter_info = None
+
     chapter_index = user.current_chapter - 1
-    if chapter_index >= len(CHAPTERS):
+    if chapter_index < len(CHAPTERS):
+        chapter = CHAPTERS[chapter_index]
+        quest_index = user.current_quest_index
+        if quest_index < len(chapter["quests"]):
+            story_quest = chapter["quests"][quest_index]
+            chapter_info = {
+                "chapter": chapter["title"],
+                "chapter_description": chapter["description"],
+                "chapter_id": chapter["id"],
+                "quest_number": quest_index + 1,
+                "total_quests": len(chapter["quests"]),
+            }
+        elif not user_quests:
+            return {"chapter_complete": True, "chapter": chapter["title"]}
+    elif not user_quests:
         return {"completed_all": True, "message": "Все главы пройдены! Ты — мастер!"}
 
-    chapter = CHAPTERS[chapter_index]
-    quest_index = user.current_quest_index
-
-    if quest_index >= len(chapter["quests"]):
-        return {"chapter_complete": True, "chapter": chapter["title"]}
-
-    quest = chapter["quests"][quest_index]
     return {
-        "chapter": chapter["title"],
-        "chapter_description": chapter["description"],
-        "chapter_id": chapter["id"],
-        "quest": quest,
-        "quest_number": quest_index + 1,
-        "total_quests": len(chapter["quests"]),
+        "story_quest": story_quest,
+        "chapter_info": chapter_info,
+        "user_quests": user_quests,
     }
 
 
@@ -153,7 +183,23 @@ async def submit_task(
                 break
 
     if not quest:
-        raise HTTPException(status_code=404, detail="Quest not found")
+        user_task = db.query(UserTask).filter(
+            UserTask.id == int(quest_id.replace("user_", "")) if quest_id.startswith("user_") else UserTask.id == -1
+        ).first()
+        if user_task:
+            quest = {
+                "id": quest_id,
+                "title": user_task.title,
+                "description": user_task.description or user_task.title,
+                "stat": user_task.stat,
+                "xp": user_task.xp,
+                "coins": 10,
+                "verification_prompt": f"Пользователь должен показать фото, подтверждающее выполнение задачи: {user_task.title}",
+                "is_user_task": True,
+                "user_task_id": user_task.id,
+            }
+        else:
+            raise HTTPException(status_code=404, detail="Quest not found")
 
     image_bytes = await photo.read()
 
@@ -211,13 +257,18 @@ async def submit_task(
         elif stat == "social":
             user.social += 1
 
-        user.current_quest_index += 1
-        chapter_index = user.current_chapter - 1
-        if chapter_index < len(CHAPTERS):
-            chapter = CHAPTERS[chapter_index]
-            if user.current_quest_index >= len(chapter["quests"]):
-                user.current_chapter += 1
-                user.current_quest_index = 0
+        if quest.get("is_user_task"):
+            ut = db.query(UserTask).filter(UserTask.id == quest["user_task_id"]).first()
+            if ut:
+                ut.is_completed = True
+        else:
+            user.current_quest_index += 1
+            chapter_index = user.current_chapter - 1
+            if chapter_index < len(CHAPTERS):
+                chapter = CHAPTERS[chapter_index]
+                if user.current_quest_index >= len(chapter["quests"]):
+                    user.current_chapter += 1
+                    user.current_quest_index = 0
 
         loot_drop = roll_loot()
         if loot_drop:
@@ -264,6 +315,85 @@ async def submit_task(
         "loot": loot,
         "user": user_to_dict(user),
     }
+
+
+# --- User Tasks endpoints ---
+
+@app.get("/api/users/{username}/tasks")
+def get_user_tasks(username: str, date: str = None, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    q = db.query(UserTask).filter(UserTask.user_id == user.id)
+    if date:
+        q = q.filter(UserTask.scheduled_date == date)
+    tasks = q.order_by(UserTask.scheduled_date, UserTask.created_at).all()
+
+    return [
+        {
+            "id": t.id,
+            "title": t.title,
+            "description": t.description,
+            "stat": t.stat,
+            "xp": t.xp,
+            "scheduled_date": t.scheduled_date,
+            "is_completed": t.is_completed,
+        }
+        for t in tasks
+    ]
+
+
+@app.post("/api/users/{username}/tasks")
+def create_user_task(
+    username: str,
+    title: str = Form(...),
+    description: str = Form(""),
+    stat: str = Form("discipline"),
+    xp: int = Form(50),
+    scheduled_date: str = Form(...),
+    db: Session = Depends(get_db),
+):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    task = UserTask(
+        user_id=user.id,
+        title=title,
+        description=description,
+        stat=stat,
+        xp=xp,
+        scheduled_date=scheduled_date,
+    )
+    db.add(task)
+    db.commit()
+    db.refresh(task)
+
+    return {
+        "id": task.id,
+        "title": task.title,
+        "description": task.description,
+        "stat": task.stat,
+        "xp": task.xp,
+        "scheduled_date": task.scheduled_date,
+        "is_completed": task.is_completed,
+    }
+
+
+@app.delete("/api/users/{username}/tasks/{task_id}")
+def delete_user_task(username: str, task_id: int, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    task = db.query(UserTask).filter(UserTask.id == task_id, UserTask.user_id == user.id).first()
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+
+    db.delete(task)
+    db.commit()
+    return {"success": True}
 
 
 # --- Shop endpoints ---
@@ -385,3 +515,18 @@ def get_history(username: str, db: Session = Depends(get_db)):
         }
         for t in tasks
     ]
+
+
+# --- Serve frontend static files ---
+
+STATIC_DIR = Path(__file__).parent / "static"
+
+if STATIC_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=str(STATIC_DIR / "assets")), name="assets")
+
+    @app.get("/{path:path}")
+    async def serve_frontend(path: str):
+        file_path = STATIC_DIR / path
+        if file_path.exists() and file_path.is_file():
+            return FileResponse(str(file_path))
+        return FileResponse(str(STATIC_DIR / "index.html"))

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import LoginScreen from './pages/LoginScreen'
 import Dashboard from './pages/Dashboard'
 import QuestPage from './pages/QuestPage'
+import TasksPage from './pages/TasksPage'
 import HistoryPage from './pages/HistoryPage'
 import NavBar from './components/NavBar'
 import './App.css'
@@ -50,12 +51,9 @@ function App() {
     <div>
       {page === 'dashboard' && <Dashboard user={user} onNavigate={setPage} />}
       {page === 'quest' && <QuestPage user={user} setUser={setUser} refreshUser={refreshUser} />}
+      {page === 'tasks' && <TasksPage user={user} />}
       {page === 'history' && <HistoryPage user={user} />}
-      <NavBar
-        currentPage={page}
-        onNavigate={setPage}
-        onLogout={() => { setUser(null); localStorage.removeItem('liferpg_username') }}
-      />
+      <NavBar currentPage={page} onNavigate={setPage} />
     </div>
   )
 }

@@ -3,10 +3,11 @@ import './NavBar.css'
 const tabs = [
   { id: 'dashboard', label: 'Герой' },
   { id: 'quest', label: 'Квест' },
+  { id: 'tasks', label: 'Задачи' },
   { id: 'history', label: 'История' },
 ]
 
-function NavBar({ currentPage, onNavigate, onLogout }) {
+function NavBar({ currentPage, onNavigate }) {
   return (
     <nav className="nav">
       {tabs.map(tab => (
@@ -18,9 +19,6 @@ function NavBar({ currentPage, onNavigate, onLogout }) {
           {tab.label}
         </button>
       ))}
-      <button className="nav-tab nav-logout" onClick={onLogout}>
-        Выход
-      </button>
     </nav>
   )
 }

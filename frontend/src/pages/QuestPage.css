@@ -223,3 +223,49 @@
   color: var(--text-secondary);
   font-size: 14px;
 }
+
+/* Selectable quest cards */
+.quest-selectable {
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.quest-selectable:hover {
+  border-color: var(--border-light);
+}
+
+/* Section label */
+.section-label {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 20px 0 12px;
+}
+
+/* Back button */
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+  font-family: 'Inter', sans-serif;
+  transition: color 0.2s;
+}
+
+.back-btn:hover {
+  color: var(--text);
+}
+
+/* Quest tag */
+.quest-tag {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
+  margin-bottom: 8px;
+}

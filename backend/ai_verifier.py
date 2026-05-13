@@ -1,68 +1,106 @@
 import os
+import io
 import base64
-import google.generativeai as genai
+import httpx
+from PIL import Image
 
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GENAPI_KEY = os.getenv("GENAPI_KEY", "")
+GENAPI_URL = "https://proxy.gen-api.ru/v1/chat/completions"
+MODEL = "gemini-2-5-flash-lite"
+
+MAX_SIZE = 512
+JPEG_QUALITY = 60
 
 
-def configure_gemini():
-    if GEMINI_API_KEY:
-        genai.configure(api_key=GEMINI_API_KEY)
+def compress_image(image_bytes: bytes) -> str:
+    img = Image.open(io.BytesIO(image_bytes))
+    img = img.convert("RGB")
+    w, h = img.size
+    if max(w, h) > MAX_SIZE:
+        ratio = MAX_SIZE / max(w, h)
+        img = img.resize((int(w * ratio), int(h * ratio)), Image.LANCZOS)
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG", quality=JPEG_QUALITY, optimize=True)
+    return base64.b64encode(buf.getvalue()).decode("utf-8")
 
 
 async def verify_task_photo(image_bytes: bytes, task_description: str, verification_prompt: str, user_comment: str) -> dict:
-    """Verify a photo submission using Gemini Vision API."""
-    if not GEMINI_API_KEY:
+    if not GENAPI_KEY:
         return {
             "approved": False,
-            "verdict": "API ключ Gemini не настроен. Обратитесь к администратору."
+            "verdict": "API ключ не настроен."
         }
 
-    configure_gemini()
+    b64_image = compress_image(image_bytes)
 
-    model = genai.GenerativeModel("gemini-1.5-flash")
-
-    prompt = f"""Ты — строгий судья в RPG-игре "LifeRPG", где люди выполняют реальные задания для прокачки персонажа.
+    prompt = f"""Ты — строгий судья в RPG-игре "LifeRPG". Проверь фото.
 
 Задание: {task_description}
+Комментарий: {user_comment}
+Критерии: {verification_prompt}
 
-Комментарий пользователя: {user_comment}
-
-Критерии проверки: {verification_prompt}
-
-Проанализируй фотографию и реши, выполнил ли пользователь задание. Будь строгим, но справедливым.
-
-Ответь СТРОГО в формате:
+Ответь СТРОГО:
 РЕШЕНИЕ: ОДОБРЕНО или РЕШЕНИЕ: ОТКЛОНЕНО
-ПРИЧИНА: [короткое объяснение на 1-2 предложения]
+ПРИЧИНА: [1 предложение]"""
 
-Если фото не соответствует заданию, явно поддельное или не имеет отношения к задаче — отклони.
-Если фото показывает честную попытку выполнить задание — одобри."""
-
-    image_part = {
-        "mime_type": "image/jpeg",
-        "data": base64.b64encode(image_bytes).decode("utf-8")
+    payload = {
+        "model": MODEL,
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"type": "text", "text": prompt},
+                    {
+                        "type": "image_url",
+                        "image_url": {
+                            "url": f"data:image/jpeg;base64,{b64_image}"
+                        }
+                    }
+                ]
+            }
+        ],
+        "max_tokens": 100
     }
 
     try:
-        response = model.generate_content([prompt, image_part])
-        text = response.text.strip()
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(
+                GENAPI_URL,
+                json=payload,
+                headers={
+                    "Authorization": f"Bearer {GENAPI_KEY}",
+                    "Content-Type": "application/json"
+                }
+            )
+            data = resp.json()
 
-        approved = "ОДОБРЕНО" in text.upper()
+            if data.get("error"):
+                return {"approved": False, "verdict": f"Ошибка API: {data['error']}"}
 
-        reason_line = ""
-        for line in text.split("\n"):
-            if "ПРИЧИНА:" in line.upper():
-                reason_line = line.split(":", 1)[1].strip()
-                break
+            text = ""
+            choices = data.get("choices", [])
+            if choices and isinstance(choices, list):
+                text = choices[0].get("message", {}).get("content", "")
 
-        if not reason_line:
-            reason_line = text
+            if not text:
+                return {"approved": False, "verdict": "Не удалось получить ответ от AI."}
 
-        return {
-            "approved": approved,
-            "verdict": reason_line
-        }
+            text = text.strip()
+            approved = "ОДОБРЕНО" in text.upper()
+
+            reason_line = ""
+            for line in text.split("\n"):
+                if "ПРИЧИНА:" in line.upper():
+                    reason_line = line.split(":", 1)[1].strip()
+                    break
+
+            if not reason_line:
+                reason_line = text
+
+            return {
+                "approved": approved,
+                "verdict": reason_line
+            }
     except Exception as e:
         return {
             "approved": False,

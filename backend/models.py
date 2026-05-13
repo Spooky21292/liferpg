@@ -39,6 +39,7 @@ class User(Base):
 
     completed_tasks = relationship("CompletedTask", back_populates="user")
     inventory_items = relationship("InventoryItem", back_populates="user")
+    user_tasks = relationship("UserTask", back_populates="user")
 
 
 class CompletedTask(Base):
@@ -71,3 +72,19 @@ class InventoryItem(Base):
     acquired_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="inventory_items")
+
+
+class UserTask(Base):
+    __tablename__ = "user_tasks"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    title = Column(String(200), nullable=False)
+    description = Column(Text, default="")
+    stat = Column(String(20), default="discipline")
+    xp = Column(Integer, default=50)
+    scheduled_date = Column(String(10), nullable=False)  # YYYY-MM-DD
+    is_completed = Column(Boolean, default=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = relationship("User", back_populates="user_tasks")
