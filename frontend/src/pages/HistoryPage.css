@@ -1,111 +1,70 @@
-.history-page {
-  padding: 16px;
+.history {
+  padding: 24px 20px;
 }
 
 .history-title {
   font-size: 22px;
-  margin-bottom: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin-bottom: 24px;
 }
 
-.empty-history {
-  text-align: center;
-  padding: 40px 20px;
+.history-empty {
   color: var(--text-muted);
-}
-
-.empty-history span {
-  font-size: 48px;
-  display: block;
-  margin-bottom: 12px;
-}
-
-.empty-hint {
-  font-size: 13px;
-  margin-top: 4px;
-  opacity: 0.7;
+  text-align: center;
+  padding: 60px 0;
+  font-size: 14px;
 }
 
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1px;
 }
 
 .history-item {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.history-item:last-child {
+  border-bottom: none;
+}
+
+.history-top {
   display: flex;
-  gap: 12px;
-  padding: 14px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  transition: all 0.2s;
-}
-
-.history-item.approved {
-  border-left: 3px solid var(--green);
-}
-
-.history-item.rejected {
-  border-left: 3px solid var(--red);
+  justify-content: space-between;
+  margin-bottom: 6px;
 }
 
 .history-status {
-  font-size: 20px;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.history-content {
-  flex: 1;
-  min-width: 0;
-}
-
-.history-quest-id {
   font-size: 12px;
   color: var(--text-muted);
-  margin-bottom: 4px;
+}
+
+.history-date {
+  font-size: 11px;
+  color: var(--text-muted);
 }
 
 .history-comment {
   font-size: 14px;
-  margin-bottom: 4px;
-  font-style: italic;
   color: var(--text);
+  margin-bottom: 4px;
 }
 
 .history-verdict {
   font-size: 13px;
   color: var(--text-muted);
   line-height: 1.4;
-  margin-bottom: 8px;
 }
 
-.history-meta {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
+.history-rewards {
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
 }
 
-.history-xp {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gold);
-}
-
-.history-coins {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--gold);
-}
-
-.history-stat {
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.history-date {
-  font-size: 11px;
+.history-item.rejected .history-status {
   color: var(--text-muted);
-  margin-left: auto;
 }

@@ -1,78 +1,58 @@
 .quest-page {
-  padding: 16px;
+  padding: 24px 20px;
 }
 
-.loading-spinner {
-  text-align: center;
-  padding: 60px 20px;
+.quest-empty {
   color: var(--text-muted);
-  font-size: 16px;
+  text-align: center;
+  padding: 60px 0;
+  font-size: 14px;
 }
 
-/* Chapter Header */
-.chapter-header {
-  margin-bottom: 16px;
+/* Chapter */
+.quest-chapter {
+  margin-bottom: 24px;
 }
 
-.chapter-tag {
-  display: inline-block;
-  background: var(--primary);
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+.quest-chapter-tag {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: block;
   margin-bottom: 8px;
 }
 
-.chapter-title {
-  font-size: 20px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-
-.chapter-desc {
-  color: var(--text-muted);
+.quest-chapter-desc {
   font-size: 14px;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
 /* Quest Card */
 .quest-card {
-  background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 8px;
   padding: 20px;
-  margin-bottom: 16px;
-  position: relative;
-  overflow: hidden;
+  margin-bottom: 24px;
 }
 
-.quest-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--gold), var(--primary));
-}
-
-.quest-progress {
-  font-size: 12px;
+.quest-meta {
+  font-size: 11px;
   color: var(--text-muted);
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .quest-title {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   margin-bottom: 8px;
 }
 
-.quest-description {
-  color: var(--text-muted);
+.quest-desc {
   font-size: 14px;
+  color: var(--text-secondary);
   line-height: 1.5;
   margin-bottom: 16px;
 }
@@ -80,143 +60,133 @@
 .quest-rewards {
   display: flex;
   gap: 16px;
-}
-
-.reward {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--gold);
-}
-
-/* Submit Section */
-.submit-section {
-  margin-top: 16px;
-}
-
-.submit-title {
-  font-size: 16px;
-  margin-bottom: 12px;
-}
-
-.photo-upload {
-  border: 2px dashed var(--border);
-  border-radius: 16px;
-  padding: 40px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  margin-bottom: 12px;
-  overflow: hidden;
-}
-
-.photo-upload:hover {
-  border-color: var(--primary);
-  background: rgba(124, 58, 237, 0.05);
-}
-
-.photo-upload.has-photo {
-  padding: 0;
-  border-style: solid;
-  border-color: var(--green);
-}
-
-.photo-preview {
-  width: 100%;
-  max-height: 300px;
-  object-fit: cover;
-  border-radius: 14px;
-}
-
-.upload-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  font-size: 12px;
   color: var(--text-muted);
 }
 
-.upload-icon {
-  font-size: 40px;
+/* Submit */
+.submit {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.comment-input {
+.upload {
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 32px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.upload:hover {
+  border-color: var(--border-light);
+}
+
+.upload.has-img {
+  padding: 0;
+  border-style: solid;
+}
+
+.upload-img {
+  width: 100%;
+  max-height: 240px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.upload-text {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.comment {
+  resize: none;
+}
+
+.input {
   width: 100%;
   padding: 14px 16px;
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 8px;
   color: var(--text);
   font-size: 14px;
-  resize: none;
   outline: none;
-  transition: border-color 0.3s;
+  transition: border-color 0.2s;
   font-family: 'Inter', sans-serif;
-  margin-bottom: 12px;
 }
 
-.comment-input:focus {
-  border-color: var(--primary);
+.input:focus {
+  border-color: var(--border-light);
 }
 
-.comment-input::placeholder {
+.input::placeholder {
   color: var(--text-muted);
 }
 
-.submit-btn {
-  width: 100%;
-  padding: 16px;
-  background: linear-gradient(135deg, var(--green), #16a34a);
+.btn {
+  padding: 14px;
+  background: var(--text);
   border: none;
-  border-radius: 14px;
-  color: white;
-  font-size: 16px;
+  border-radius: 8px;
+  color: var(--bg);
+  font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: opacity 0.2s;
   font-family: 'Inter', sans-serif;
 }
 
-.submit-btn:hover:not(:disabled) {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.3);
+.btn:hover:not(:disabled) {
+  opacity: 0.9;
 }
 
-.submit-btn:disabled {
-  opacity: 0.5;
+.btn:disabled {
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
-/* Result */
-.result-card {
+.btn-outline {
+  padding: 12px 20px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: 'Inter', sans-serif;
   margin-top: 16px;
+}
+
+.btn-outline:hover {
+  border-color: var(--border-light);
+}
+
+/* Result */
+.result {
+  border: 1px solid var(--border);
+  border-radius: 8px;
   padding: 24px;
-  border-radius: 20px;
-  text-align: center;
+  margin-top: 8px;
 }
 
-.result-card.approved {
-  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.05));
-  border: 1px solid rgba(34, 197, 94, 0.3);
-}
-
-.result-card.rejected {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.05));
-  border: 1px solid rgba(239, 68, 68, 0.3);
-}
-
-.result-emoji {
-  font-size: 48px;
-  display: block;
+.result-status {
+  font-size: 18px;
+  font-weight: 600;
   margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.result.fail .result-status {
+  color: var(--text-secondary);
 }
 
 .result-verdict {
-  color: var(--text-muted);
   font-size: 14px;
-  margin-top: 8px;
+  color: var(--text-secondary);
   line-height: 1.5;
 }
 
@@ -224,101 +194,32 @@
   margin-top: 16px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 8px;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-secondary);
 }
 
-.reward-item {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--gold);
-}
-
-.level-up-banner {
-  font-size: 24px;
-  font-weight: 800;
-  color: var(--gold);
-  text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
-  margin-top: 8px;
-}
-
-.loot-drop {
-  margin-top: 12px;
-  padding: 12px 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.loot-label {
-  font-size: 14px;
-}
-
-.loot-name {
-  font-weight: 700;
-}
-
-.rarity-common { color: var(--rarity-common); }
-.rarity-rare { color: var(--rarity-rare); }
-.rarity-epic { color: var(--rarity-epic); }
-.rarity-legendary { color: var(--rarity-legendary); text-shadow: 0 0 10px rgba(245, 158, 11, 0.5); }
-
-.retry-btn {
-  margin-top: 16px;
-  padding: 12px 24px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+.lvlup {
   color: var(--text);
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s;
-  font-family: 'Inter', sans-serif;
-}
-
-.retry-btn:hover {
-  border-color: var(--primary);
-}
-
-/* Complete States */
-.quest-complete-all, .chapter-complete {
-  text-align: center;
-  padding: 60px 20px;
-}
-
-.complete-emoji {
-  font-size: 64px;
-  display: block;
-  margin-bottom: 16px;
-}
-
-.quest-complete-all h2, .chapter-complete h2 {
-  font-size: 24px;
-  margin-bottom: 8px;
-}
-
-.quest-complete-all p, .chapter-complete p {
-  color: var(--text-muted);
-}
-
-.next-chapter-btn {
-  margin-top: 24px;
-  padding: 14px 32px;
-  background: linear-gradient(135deg, var(--primary), #9333ea);
-  border: none;
-  border-radius: 14px;
-  color: white;
-  font-size: 16px;
   font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s;
-  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  margin-top: 4px;
 }
 
-.next-chapter-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px var(--primary-glow);
+/* Done states */
+.quest-done {
+  text-align: center;
+  padding: 60px 0;
+}
+
+.quest-done h2 {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.quest-done p {
+  color: var(--text-secondary);
+  font-size: 14px;
 }

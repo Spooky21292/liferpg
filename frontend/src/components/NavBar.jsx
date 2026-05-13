@@ -1,29 +1,25 @@
 import './NavBar.css'
 
 const tabs = [
-  { id: 'dashboard', icon: '🏠', label: 'Герой' },
-  { id: 'quest', icon: '⚔️', label: 'Квест' },
-  { id: 'shop', icon: '🏪', label: 'Магазин' },
-  { id: 'inventory', icon: '🎒', label: 'Инвентарь' },
-  { id: 'history', icon: '📜', label: 'История' },
+  { id: 'dashboard', label: 'Герой' },
+  { id: 'quest', label: 'Квест' },
+  { id: 'history', label: 'История' },
 ]
 
 function NavBar({ currentPage, onNavigate, onLogout }) {
   return (
-    <nav className="navbar">
-      {tabs.map((tab) => (
+    <nav className="nav">
+      {tabs.map(tab => (
         <button
           key={tab.id}
-          className={`nav-btn ${currentPage === tab.id ? 'active' : ''}`}
+          className={`nav-tab ${currentPage === tab.id ? 'active' : ''}`}
           onClick={() => onNavigate(tab.id)}
         >
-          <span className="nav-icon">{tab.icon}</span>
-          <span className="nav-label">{tab.label}</span>
+          {tab.label}
         </button>
       ))}
-      <button className="nav-btn logout-btn" onClick={onLogout}>
-        <span className="nav-icon">🚪</span>
-        <span className="nav-label">Выйти</span>
+      <button className="nav-tab nav-logout" onClick={onLogout}>
+        Выход
       </button>
     </nav>
   )

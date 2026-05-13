@@ -1,194 +1,80 @@
-.dashboard {
-  padding: 16px;
+.dash {
+  padding: 24px 20px;
 }
 
-/* Hero Card */
-.hero-card {
-  background: linear-gradient(135deg, var(--bg-card), #1e1e3e);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 24px;
-  margin-bottom: 20px;
-  position: relative;
-  overflow: hidden;
-}
-
-.hero-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary), var(--secondary), var(--gold));
-}
-
-.hero-header {
+.dash-header {
   display: flex;
-  align-items: center;
-  gap: 20px;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
 }
 
-.hero-avatar-area {
-  flex-shrink: 0;
-}
-
-.hero-avatar {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(6, 182, 212, 0.2));
-  border: 2px solid var(--primary);
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.avatar-emoji {
-  font-size: 40px;
-}
-
-.equip-badge {
-  position: absolute;
-  font-size: 14px;
-  background: var(--bg-card);
-  border-radius: 50%;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.armor-badge { bottom: -4px; left: -4px; }
-.weapon-badge { bottom: -4px; right: -4px; }
-.effect-badge { top: -4px; right: -4px; }
-
-.hero-info {
-  flex: 1;
-}
-
-.hero-name {
-  font-size: 22px;
+.dash-name {
+  font-size: 28px;
   font-weight: 700;
-  margin-bottom: 4px;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
 }
 
-.hero-level {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.level-badge {
-  background: var(--primary);
-  color: white;
-  padding: 2px 10px;
-  border-radius: 20px;
+.dash-level {
   font-size: 12px;
-  font-weight: 700;
+  color: var(--text-muted);
+  margin-top: 4px;
+  display: block;
 }
 
-.hero-title {
-  color: var(--text-muted);
-  font-size: 14px;
+.dash-streak {
+  font-size: 12px;
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  border-radius: 4px;
 }
 
 /* XP */
 .xp-section {
-  margin-bottom: 16px;
+  margin-bottom: 40px;
 }
 
-.xp-info {
+.xp-label {
   display: flex;
-  justify-content: space-between;
-  font-size: 12px;
+  align-items: baseline;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.xp-label .mono:first-child {
+  font-size: 24px;
+  font-weight: 500;
+}
+
+.xp-max {
+  font-size: 13px;
   color: var(--text-muted);
-  margin-bottom: 6px;
+}
+
+.xp-track {
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
 }
 
 .xp-bar {
-  height: 8px;
-  background: rgba(124, 58, 237, 0.15);
-  border-radius: 4px;
-  overflow: hidden;
-}
-
-.xp-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary), #9333ea);
-  border-radius: 4px;
+  background: var(--text);
+  border-radius: 1px;
   transition: width 0.5s ease;
-  position: relative;
-}
-
-.xp-fill::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-  background-size: 200% 100%;
-  animation: shimmer 2s infinite;
-}
-
-/* Meta */
-.hero-meta {
-  display: flex;
-  justify-content: space-around;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.meta-item span:first-child {
-  font-size: 18px;
 }
 
 /* Stats */
-.section-title {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 12px;
-  color: var(--text-muted);
-}
-
-.stats-grid {
+.stats {
+  margin-bottom: 40px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 20px;
+  gap: 16px;
 }
 
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  transition: all 0.2s;
-}
-
-.stat-card:hover {
-  background: var(--bg-card-hover);
-  transform: translateX(4px);
-}
-
-.stat-icon {
-  font-size: 24px;
-  flex-shrink: 0;
-}
-
-.stat-info {
-  flex: 1;
+.stat-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -196,67 +82,54 @@
 
 .stat-name {
   font-size: 14px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
+  font-weight: 400;
 }
 
-.stat-value {
-  font-size: 18px;
-  font-weight: 700;
-}
-
-.stat-bar-bg {
-  width: 60px;
-  height: 4px;
-  background: rgba(255,255,255,0.1);
-  border-radius: 2px;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.stat-bar-fill {
-  height: 100%;
-  border-radius: 2px;
-  transition: width 0.5s ease;
-}
-
-/* Quick Actions */
-.quick-actions {
+.stat-right {
   display: flex;
+  align-items: center;
   gap: 12px;
 }
 
-.action-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--bg-card);
-  color: var(--text);
+.stat-val {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
+  width: 24px;
+  text-align: right;
+}
+
+.stat-track {
+  width: 80px;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+}
+
+.stat-bar {
+  height: 100%;
+  background: var(--text-secondary);
+  border-radius: 1px;
+  transition: width 0.5s ease;
+}
+
+/* CTA */
+.cta {
+  width: 100%;
+  padding: 16px;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s;
   font-family: 'Inter', sans-serif;
+  letter-spacing: -0.01em;
 }
 
-.action-btn:hover {
-  transform: translateY(-2px);
-}
-
-.quest-btn {
-  background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(124, 58, 237, 0.1));
-  border-color: var(--primary);
-}
-
-.shop-btn:hover {
-  border-color: var(--gold);
-  background: rgba(251, 191, 36, 0.1);
-}
-
-.action-btn span:first-child {
-  font-size: 20px;
+.cta:hover {
+  border-color: var(--border-light);
+  background: var(--bg-card);
 }

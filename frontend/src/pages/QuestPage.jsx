@@ -3,6 +3,14 @@ import './QuestPage.css'
 
 const API = '/api'
 
+const STAT_NAMES = {
+  strength: 'Сила',
+  intelligence: 'Интеллект',
+  creativity: 'Креативность',
+  discipline: 'Дисциплина',
+  social: 'Социальность',
+}
+
 function QuestPage({ user, setUser, refreshUser }) {
   const [quest, setQuest] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -11,25 +19,20 @@ function QuestPage({ user, setUser, refreshUser }) {
   const [photoPreview, setPhotoPreview] = useState(null)
   const [comment, setComment] = useState('')
   const [result, setResult] = useState(null)
-  const fileInputRef = useRef(null)
+  const fileRef = useRef(null)
 
   const fetchQuest = async () => {
     setLoading(true)
     try {
       const res = await fetch(`${API}/users/${encodeURIComponent(user.username)}/current-quest`)
-      const data = await res.json()
-      setQuest(data)
-    } catch (err) {
-      console.error(err)
-    }
+      setQuest(await res.json())
+    } catch (err) { console.error(err) }
     setLoading(false)
   }
 
-  useEffect(() => {
-    fetchQuest()
-  }, [user.username])
+  useEffect(() => { fetchQuest() }, [user.username])
 
-  const handlePhotoChange = (e) => {
+  const handlePhoto = (e) => {
     const file = e.target.files[0]
     if (file) {
       setPhoto(file)
@@ -44,54 +47,39 @@ function QuestPage({ user, setUser, refreshUser }) {
     setSubmitting(true)
     setResult(null)
 
-    const formData = new FormData()
-    formData.append('quest_id', quest.quest.id)
-    formData.append('comment', comment)
-    formData.append('photo', photo)
+    const form = new FormData()
+    form.append('quest_id', quest.quest.id)
+    form.append('comment', comment)
+    form.append('photo', photo)
 
     try {
       const res = await fetch(`${API}/users/${encodeURIComponent(user.username)}/submit-task`, {
         method: 'POST',
-        body: formData,
+        body: form,
       })
       const data = await res.json()
       setResult(data)
-
-      if (data.user) {
-        setUser(data.user)
-      }
-
+      if (data.user) setUser(data.user)
       if (data.approved) {
         setTimeout(() => {
-          setPhoto(null)
-          setPhotoPreview(null)
-          setComment('')
-          setResult(null)
+          setPhoto(null); setPhotoPreview(null); setComment(''); setResult(null)
           fetchQuest()
-        }, 5000)
+        }, 4000)
       }
     } catch (err) {
-      console.error(err)
-      setResult({ approved: false, verdict: 'Ошибка сети. Попробуй снова.' })
+      setResult({ approved: false, verdict: 'Ошибка сети' })
     }
     setSubmitting(false)
   }
 
-  if (loading) {
-    return (
-      <div className="quest-page">
-        <div className="loading-spinner">⏳ Загрузка квеста...</div>
-      </div>
-    )
-  }
+  if (loading) return <div className="quest-page"><p className="quest-empty">Загрузка...</p></div>
 
   if (quest?.completed_all) {
     return (
-      <div className="quest-page">
-        <div className="quest-complete-all animate-slide-up">
-          <span className="complete-emoji">🏆</span>
-          <h2>Все главы пройдены!</h2>
-          <p>Ты — настоящий мастер. Продолжай совершенствоваться!</p>
+      <div className="quest-page animate-in">
+        <div className="quest-done">
+          <h2>Все главы пройдены</h2>
+          <p>Ты прошёл весь путь. Продолжай совершенствоваться.</p>
         </div>
       </div>
     )
@@ -99,154 +87,85 @@ function QuestPage({ user, setUser, refreshUser }) {
 
   if (quest?.chapter_complete) {
     return (
-      <div className="quest-page">
-        <div className="chapter-complete animate-slide-up">
-          <span className="complete-emoji">🎉</span>
-          <h2>Глава пройдена!</h2>
+      <div className="quest-page animate-in">
+        <div className="quest-done">
+          <h2>Глава пройдена</h2>
           <p>{quest.chapter}</p>
-          <button className="next-chapter-btn" onClick={fetchQuest}>
-            Следующая глава →
-          </button>
+          <button className="btn-outline" onClick={fetchQuest}>Далее →</button>
         </div>
       </div>
     )
   }
 
-  if (!quest?.quest) {
-    return (
-      <div className="quest-page">
-        <div className="loading-spinner">Нет доступных квестов</div>
-      </div>
-    )
-  }
-
-  const STAT_ICONS = {
-    strength: '💪',
-    intelligence: '🧠',
-    creativity: '🎨',
-    discipline: '🎯',
-    social: '👥',
-  }
+  if (!quest?.quest) return <div className="quest-page"><p className="quest-empty">Нет квестов</p></div>
 
   return (
-    <div className="quest-page animate-fade-in">
-      {/* Chapter Header */}
-      <div className="chapter-header">
-        <span className="chapter-tag">Глава {quest.chapter_id}</span>
-        <h2 className="chapter-title">{quest.chapter}</h2>
-        <p className="chapter-desc">{quest.chapter_description}</p>
+    <div className="quest-page animate-in">
+      {/* Chapter */}
+      <div className="quest-chapter">
+        <span className="mono quest-chapter-tag">Глава {quest.chapter_id}</span>
+        <p className="quest-chapter-desc">{quest.chapter_description}</p>
       </div>
 
-      {/* Quest Card */}
+      {/* Quest */}
       <div className="quest-card">
-        <div className="quest-progress">
-          Квест {quest.quest_number} из {quest.total_quests}
-        </div>
-
-        <h3 className="quest-title">{quest.quest.title}</h3>
-        <p className="quest-description">{quest.quest.description}</p>
-
-        <div className="quest-rewards">
-          <div className="reward">
-            <span>⭐</span>
-            <span>{quest.quest.xp} XP</span>
-          </div>
-          <div className="reward">
-            <span>🪙</span>
-            <span>{quest.quest.coins}</span>
-          </div>
-          <div className="reward">
-            <span>{STAT_ICONS[quest.quest.stat] || '📊'}</span>
-            <span>+1</span>
-          </div>
+        <div className="quest-meta mono">{quest.quest_number} / {quest.total_quests}</div>
+        <h2 className="quest-title">{quest.quest.title}</h2>
+        <p className="quest-desc">{quest.quest.description}</p>
+        <div className="quest-rewards mono">
+          <span>+{quest.quest.xp} xp</span>
+          <span>+1 {STAT_NAMES[quest.quest.stat] || quest.quest.stat}</span>
         </div>
       </div>
 
-      {/* Submit Section */}
+      {/* Submit */}
       {!result && (
-        <div className="submit-section">
-          <h3 className="submit-title">📸 Подтверди выполнение</h3>
-
+        <div className="submit">
           <div
-            className={`photo-upload ${photoPreview ? 'has-photo' : ''}`}
-            onClick={() => fileInputRef.current?.click()}
+            className={`upload ${photoPreview ? 'has-img' : ''}`}
+            onClick={() => fileRef.current?.click()}
           >
             {photoPreview ? (
-              <img src={photoPreview} alt="Preview" className="photo-preview" />
+              <img src={photoPreview} alt="photo" className="upload-img" />
             ) : (
-              <div className="upload-placeholder">
-                <span className="upload-icon">📷</span>
-                <span>Нажми, чтобы загрузить фото</span>
-              </div>
+              <span className="upload-text">Загрузить фото</span>
             )}
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handlePhotoChange}
-              style={{ display: 'none' }}
-            />
+            <input ref={fileRef} type="file" accept="image/*" onChange={handlePhoto} hidden />
           </div>
 
           <textarea
-            className="comment-input"
-            placeholder="Расскажи, что ты сделал..."
+            className="input comment"
+            placeholder="Что ты сделал..."
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            rows={3}
+            rows={2}
           />
 
-          <button
-            className="submit-btn"
-            onClick={handleSubmit}
-            disabled={!photo || submitting}
-          >
-            {submitting ? '🤖 AI проверяет...' : '✅ Отправить на проверку'}
+          <button className="btn" onClick={handleSubmit} disabled={!photo || submitting}>
+            {submitting ? 'AI проверяет...' : 'Отправить'}
           </button>
         </div>
       )}
 
       {/* Result */}
       {result && (
-        <div className={`result-card animate-slide-up ${result.approved ? 'approved' : 'rejected'}`}>
-          <span className="result-emoji">
-            {result.approved ? '✅' : '❌'}
-          </span>
-          <h3>{result.approved ? 'Одобрено!' : 'Отклонено'}</h3>
+        <div className={`result animate-in ${result.approved ? 'ok' : 'fail'}`}>
+          <div className="result-status">{result.approved ? 'Одобрено' : 'Отклонено'}</div>
           <p className="result-verdict">{result.verdict}</p>
 
           {result.approved && (
-            <div className="result-rewards">
-              <div className="reward-item animate-slide-up" style={{ animationDelay: '0.2s' }}>
-                +{result.xp_earned} XP
-              </div>
-              <div className="reward-item animate-slide-up" style={{ animationDelay: '0.4s' }}>
-                +{result.coins_earned} 🪙
-              </div>
-              {result.level_up && (
-                <div className="level-up-banner animate-slide-up" style={{ animationDelay: '0.6s' }}>
-                  🎉 LEVEL UP!
-                </div>
-              )}
-              {result.loot && (
-                <div className="loot-drop animate-loot" style={{ animationDelay: '0.8s' }}>
-                  <span className="loot-label">🎁 Дроп:</span>
-                  <span className={`loot-name rarity-${result.loot.rarity}`}>
-                    {result.loot.name}
-                  </span>
-                </div>
-              )}
+            <div className="result-rewards mono">
+              <span>+{result.xp_earned} xp</span>
+              {result.level_up && <span className="lvlup">LEVEL UP</span>}
+              {result.loot && <span>Дроп: {result.loot.name}</span>}
             </div>
           )}
 
           {!result.approved && (
-            <button className="retry-btn" onClick={() => {
-              setResult(null)
-              setPhoto(null)
-              setPhotoPreview(null)
-              setComment('')
+            <button className="btn-outline" onClick={() => {
+              setResult(null); setPhoto(null); setPhotoPreview(null); setComment('')
             }}>
-              🔄 Попробовать снова
+              Попробовать снова
             </button>
           )}
         </div>

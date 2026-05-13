@@ -1,4 +1,4 @@
-.navbar {
+.nav {
   position: fixed;
   bottom: 0;
   left: 50%;
@@ -6,51 +6,32 @@
   width: 100%;
   max-width: 480px;
   display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background: rgba(20, 20, 40, 0.95);
-  backdrop-filter: blur(20px);
+  background: #000;
   border-top: 1px solid var(--border);
-  padding: 6px 4px;
-  z-index: 100;
 }
 
-.nav-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 6px 8px;
-  border: none;
+.nav-tab {
+  flex: 1;
+  padding: 16px 0;
   background: none;
+  border: none;
   color: var(--text-muted);
-  cursor: pointer;
-  border-radius: 10px;
-  transition: all 0.2s;
-  font-size: 12px;
-}
-
-.nav-btn:hover {
-  color: var(--text);
-  background: rgba(124, 58, 237, 0.1);
-}
-
-.nav-btn.active {
-  color: var(--primary);
-  background: rgba(124, 58, 237, 0.15);
-}
-
-.nav-icon {
-  font-size: 20px;
-  line-height: 1;
-}
-
-.nav-label {
-  font-size: 10px;
+  font-size: 13px;
   font-weight: 500;
+  cursor: pointer;
+  transition: color 0.2s;
+  font-family: 'Inter', sans-serif;
+  letter-spacing: -0.01em;
 }
 
-.logout-btn:hover {
-  color: var(--red);
-  background: rgba(239, 68, 68, 0.1);
+.nav-tab:hover {
+  color: var(--text-secondary);
+}
+
+.nav-tab.active {
+  color: var(--text);
+}
+
+.nav-logout:hover {
+  color: var(--text-secondary);
 }
