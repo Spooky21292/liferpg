@@ -45,10 +45,9 @@ function renderText(text) {
   })
 }
 
-function CoachPage({ user, messages, setMessages }) {
+function CoachPage({ user, messages, setMessages, addedTasks, setAddedTasks }) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
-  const [addedTasks, setAddedTasks] = useState({})
   const bottomRef = useRef(null)
   const inputRef = useRef(null)
 
