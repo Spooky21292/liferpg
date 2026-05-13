@@ -14,6 +14,9 @@ function App() {
   const [user, setUser] = useState(null)
   const [page, setPage] = useState('dashboard')
   const [loading, setLoading] = useState(false)
+  const [coachMessages, setCoachMessages] = useState([
+    { role: 'assistant', content: 'Я твой наставник. Спроси совет, пожалуйся на лень или попроси план действий. Я знаю твои статы и буду строг.' }
+  ])
 
   const loginOrRegister = async (username) => {
     setLoading(true)
@@ -53,7 +56,7 @@ function App() {
       {page === 'dashboard' && <Dashboard user={user} onNavigate={setPage} />}
       {page === 'quest' && <QuestPage user={user} setUser={setUser} refreshUser={refreshUser} />}
       {page === 'tasks' && <TasksPage user={user} />}
-      {page === 'coach' && <CoachPage user={user} />}
+      {page === 'coach' && <CoachPage user={user} messages={coachMessages} setMessages={setCoachMessages} />}
       {page === 'history' && <HistoryPage user={user} />}
       <NavBar currentPage={page} onNavigate={setPage} />
     </div>

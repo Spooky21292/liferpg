@@ -3,10 +3,7 @@ import './CoachPage.css'
 
 const API = '/api'
 
-function CoachPage({ user }) {
-  const [messages, setMessages] = useState([
-    { role: 'assistant', content: 'Я твой наставник. Спроси совет, пожалуйся на лень или попроси план действий. Я знаю твои статы и буду строг.' }
-  ])
+function CoachPage({ user, messages, setMessages }) {
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
