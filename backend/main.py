@@ -1,5 +1,6 @@
 import os
 import random
+import secrets
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
@@ -155,51 +156,84 @@ def google_auth(req: GoogleAuthRequest, db: Session = Depends(get_db)):
     return user_to_dict(user)
 
 
-class TelegramAuthRequest(BaseModel):
-    id: int
-    first_name: str = ""
-    last_name: str = ""
-    username: str = ""
-    photo_url: str = ""
-    auth_date: int
-    hash: str
+# Telegram link-based auth: token → pending/completed
+telegram_auth_tokens: dict[str, dict] = {}  # token -> {"status": "pending"} or {"status": "ok", "username": "..."}
+TELEGRAM_BOT_USERNAME = "liferrpg_app_bot"
 
 
-def verify_telegram_hash(data: dict) -> bool:
-    check_hash = data.pop("hash", "")
-    data_check = "\n".join(f"{k}={v}" for k, v in sorted(data.items()) if v)
-    secret = hashlib.sha256(TELEGRAM_BOT_TOKEN.encode()).digest()
-    calculated = hmac.new(secret, data_check.encode(), hashlib.sha256).hexdigest()
-    return calculated == check_hash
+@app.post("/api/auth/telegram/init")
+def telegram_init():
+    token = secrets.token_urlsafe(24)
+    telegram_auth_tokens[token] = {"status": "pending"}
+    return {
+        "token": token,
+        "link": f"https://t.me/{TELEGRAM_BOT_USERNAME}?start={token}",
+    }
 
 
-@app.post("/api/auth/telegram")
-def telegram_auth(req: TelegramAuthRequest, db: Session = Depends(get_db)):
-    auth_data = {k: v for k, v in req.model_dump().items() if v or k in ("id", "auth_date", "hash")}
-    auth_data["id"] = str(auth_data["id"])
-    auth_data["auth_date"] = str(auth_data["auth_date"])
+@app.get("/api/auth/telegram/check/{token}")
+def telegram_check(token: str, db: Session = Depends(get_db)):
+    entry = telegram_auth_tokens.get(token)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Token not found")
+    if entry["status"] == "pending":
+        return {"status": "pending"}
+    username = entry["username"]
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    del telegram_auth_tokens[token]
+    return {"status": "ok", "user": user_to_dict(user)}
 
-    if not verify_telegram_hash(dict(auth_data)):
-        raise HTTPException(status_code=401, detail="Invalid Telegram auth")
 
-    telegram_id = str(req.id)
+@app.post("/api/telegram/webhook")
+async def telegram_webhook(request: dict, db: Session = Depends(get_db)):
+    message = request.get("message", {})
+    text = message.get("text", "")
+    from_user = message.get("from", {})
+    telegram_id = str(from_user.get("id", ""))
+    chat_id = message.get("chat", {}).get("id")
+
+    if not text.startswith("/start "):
+        if chat_id:
+            await send_telegram_message(chat_id, "Используй ссылку с сайта LifeRPG для входа.")
+        return {"ok": True}
+
+    token = text.replace("/start ", "").strip()
+    if token not in telegram_auth_tokens:
+        if chat_id:
+            await send_telegram_message(chat_id, "Ссылка устарела. Получи новую на сайте LifeRPG.")
+        return {"ok": True}
 
     user = db.query(User).filter(User.telegram_id == telegram_id).first()
-    if user:
-        return user_to_dict(user)
+    if not user:
+        tg_username = from_user.get("username", "")
+        tg_first = from_user.get("first_name", "")
+        username = (tg_username or tg_first or f"tg_{telegram_id}").replace(" ", "_")[:30]
+        base = username
+        counter = 1
+        while db.query(User).filter(User.username == username).first():
+            username = f"{base}_{counter}"
+            counter += 1
+        user = User(username=username, telegram_id=telegram_id)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
-    username = (req.username or req.first_name or f"tg_{telegram_id}").replace(" ", "_")[:30]
-    base = username
-    counter = 1
-    while db.query(User).filter(User.username == username).first():
-        username = f"{base}_{counter}"
-        counter += 1
+    telegram_auth_tokens[token] = {"status": "ok", "username": user.username}
 
-    user = User(username=username, telegram_id=telegram_id)
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user_to_dict(user)
+    if chat_id:
+        await send_telegram_message(
+            chat_id,
+            f"Аккаунт успешно привязан.\nВаш логин: {user.username}\n\nВернитесь на сайт — вход произойдёт автоматически."
+        )
+    return {"ok": True}
+
+
+async def send_telegram_message(chat_id: int, text: str):
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    async with httpx.AsyncClient() as client:
+        await client.post(url, json={"chat_id": chat_id, "text": text})
 
 
 # --- Quest endpoints ---

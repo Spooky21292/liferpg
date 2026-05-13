@@ -1,12 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import './LoginScreen.css'
 
+const API = '/api'
 const GOOGLE_CLIENT_ID = '855103585243-fqcdk0a5ces4i1b1gfd1vafvhlcrmpcu.apps.googleusercontent.com'
-const TELEGRAM_BOT_NAME = 'liferrpg_app_bot'
 
 function LoginScreen({ onLogin, onAuthLogin, loading }) {
   const [username, setUsername] = useState('')
-  const tgRef = useRef(null)
+  const [tgLink, setTgLink] = useState(null)
+  const [tgToken, setTgToken] = useState(null)
+  const [tgWaiting, setTgWaiting] = useState(false)
+  const pollRef = useRef(null)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -17,13 +20,6 @@ function LoginScreen({ onLogin, onAuthLogin, loading }) {
     if (response.credential) {
       onAuthLogin('google', response.credential)
     }
-  }, [onAuthLogin])
-
-  useEffect(() => {
-    window.onTelegramAuth = (tgUser) => {
-      onAuthLogin('telegram', tgUser)
-    }
-    return () => { delete window.onTelegramAuth }
   }, [onAuthLogin])
 
   useEffect(() => {
@@ -55,20 +51,36 @@ function LoginScreen({ onLogin, onAuthLogin, loading }) {
     }
   }, [handleGoogleResponse])
 
+  const startTelegramAuth = async () => {
+    try {
+      const res = await fetch(`${API}/auth/telegram/init`, { method: 'POST' })
+      const data = await res.json()
+      setTgLink(data.link)
+      setTgToken(data.token)
+      setTgWaiting(true)
+      window.open(data.link, '_blank')
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
   useEffect(() => {
-    if (!tgRef.current) return
-    const container = tgRef.current
-    container.innerHTML = ''
-    const script = document.createElement('script')
-    script.async = true
-    script.src = 'https://telegram.org/js/telegram-widget.js?22'
-    script.setAttribute('data-telegram-login', TELEGRAM_BOT_NAME)
-    script.setAttribute('data-size', 'large')
-    script.setAttribute('data-onauth', 'onTelegramAuth(user)')
-    script.setAttribute('data-request-access', 'write')
-    script.setAttribute('data-userpic', 'false')
-    container.appendChild(script)
-  }, [])
+    if (!tgWaiting || !tgToken) return
+
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`${API}/auth/telegram/check/${tgToken}`)
+        const data = await res.json()
+        if (data.status === 'ok' && data.user) {
+          clearInterval(pollRef.current)
+          setTgWaiting(false)
+          onAuthLogin('telegram_done', data.user)
+        }
+      } catch {}
+    }, 2000)
+
+    return () => clearInterval(pollRef.current)
+  }, [tgWaiting, tgToken, onAuthLogin])
 
   return (
     <div className="login">
@@ -78,7 +90,19 @@ function LoginScreen({ onLogin, onAuthLogin, loading }) {
 
         <div className="login-auth">
           <div id="google-btn" className="google-btn-wrap"></div>
-          <div ref={tgRef} className="tg-btn-wrap"></div>
+
+          {!tgWaiting ? (
+            <button className="tg-login-btn" onClick={startTelegramAuth}>
+              Войти через Telegram
+            </button>
+          ) : (
+            <div className="tg-waiting">
+              <p className="tg-waiting-text">Нажми Start в боте...</p>
+              <a href={tgLink} target="_blank" rel="noopener noreferrer" className="tg-link">
+                Открыть бота снова
+              </a>
+            </div>
+          )}
         </div>
 
         <div className="login-divider">

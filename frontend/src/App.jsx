@@ -36,6 +36,12 @@ function App() {
   }
 
   const authLogin = async (provider, credential) => {
+    if (provider === 'telegram_done') {
+      setUser(credential)
+      localStorage.setItem('liferpg_username', credential.username)
+      localStorage.setItem('liferpg_auth', 'telegram')
+      return
+    }
     setLoading(true)
     try {
       const res = await fetch(`${API}/auth/${provider}`, {
