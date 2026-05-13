@@ -55,6 +55,15 @@ function App() {
     setLoading(false)
   }
 
+  const logout = () => {
+    setUser(null)
+    setPage('dashboard')
+    setCoachMessages([{ role: 'assistant', content: 'Я твой наставник. Спроси совет, пожалуйся на лень или попроси план действий. Я знаю твои статы и буду строг.' }])
+    setCoachAddedTasks({})
+    localStorage.removeItem('liferpg_username')
+    localStorage.removeItem('liferpg_auth')
+  }
+
   const refreshUser = async () => {
     if (!user) return
     try {
@@ -75,7 +84,7 @@ function App() {
 
   return (
     <div>
-      {page === 'dashboard' && <Dashboard user={user} onNavigate={setPage} />}
+      {page === 'dashboard' && <Dashboard user={user} onNavigate={setPage} onLogout={logout} />}
       {page === 'quest' && <QuestPage user={user} setUser={setUser} refreshUser={refreshUser} />}
       {page === 'tasks' && <TasksPage user={user} />}
       {page === 'coach' && <CoachPage user={user} messages={coachMessages} setMessages={setCoachMessages} addedTasks={coachAddedTasks} setAddedTasks={setCoachAddedTasks} />}

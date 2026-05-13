@@ -133,3 +133,20 @@
   border-color: var(--border-light);
   background: var(--bg-card);
 }
+
+.logout-btn {
+  width: 100%;
+  margin-top: 12px;
+  padding: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: color 0.2s;
+}
+
+.logout-btn:hover {
+  color: var(--text);
+}

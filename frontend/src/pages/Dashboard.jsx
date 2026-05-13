@@ -8,7 +8,7 @@ const STATS = [
   { key: 'social', name: 'Социальность' },
 ]
 
-function Dashboard({ user, onNavigate }) {
+function Dashboard({ user, onNavigate, onLogout }) {
   const xpPercent = Math.min(100, (user.xp_current_level / user.xp_for_next) * 100)
 
   return (
@@ -56,6 +56,10 @@ function Dashboard({ user, onNavigate }) {
       {/* CTA */}
       <button className="cta" onClick={() => onNavigate('quest')}>
         Текущий квест →
+      </button>
+
+      <button className="logout-btn" onClick={onLogout}>
+        Выйти
       </button>
     </div>
   )
