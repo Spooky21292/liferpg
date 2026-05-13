@@ -205,27 +205,32 @@ async def telegram_webhook(request: dict, db: Session = Depends(get_db)):
             await send_telegram_message(chat_id, "Ссылка устарела. Получи новую на сайте LifeRPG.")
         return {"ok": True}
 
-    user = db.query(User).filter(User.telegram_id == telegram_id).first()
-    if not user:
-        tg_username = from_user.get("username", "")
-        tg_first = from_user.get("first_name", "")
-        username = (tg_username or tg_first or f"tg_{telegram_id}").replace(" ", "_")[:30]
-        base = username
-        counter = 1
-        while db.query(User).filter(User.username == username).first():
-            username = f"{base}_{counter}"
-            counter += 1
-        user = User(username=username, telegram_id=telegram_id)
-        db.add(user)
-        db.commit()
-        db.refresh(user)
+    existing = db.query(User).filter(User.telegram_id == telegram_id).first()
+    if existing:
+        telegram_auth_tokens[token] = {"status": "ok", "username": existing.username}
+        if chat_id:
+            await send_telegram_message(chat_id, "Вход выполнен. Вернитесь на сайт.")
+        return {"ok": True}
+
+    tg_username = from_user.get("username", "")
+    tg_first = from_user.get("first_name", "")
+    username = (tg_username or tg_first or f"tg_{telegram_id}").replace(" ", "_")[:30]
+    base = username
+    counter = 1
+    while db.query(User).filter(User.username == username).first():
+        username = f"{base}_{counter}"
+        counter += 1
+    user = User(username=username, telegram_id=telegram_id)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
 
     telegram_auth_tokens[token] = {"status": "ok", "username": user.username}
 
     if chat_id:
         await send_telegram_message(
             chat_id,
-            f"Аккаунт успешно привязан.\nВаш логин: {user.username}\n\nВернитесь на сайт — вход произойдёт автоматически."
+            f"Аккаунт создан.\nВаш логин: {user.username}\n\nВернитесь на сайт — вход произойдёт автоматически."
         )
     return {"ok": True}
 
