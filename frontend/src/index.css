@@ -18,6 +18,12 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+}
+
+html {
+  touch-action: manipulation;
 }
 
 body {
@@ -25,14 +31,29 @@ body {
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
+  min-height: 100dvh;
   -webkit-font-smoothing: antialiased;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input, textarea {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+button, a {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
 }
 
 #root {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  padding-bottom: 72px;
+  min-height: 100dvh;
+  padding-bottom: calc(72px + env(safe-area-inset-bottom, 0px));
 }
 
 ::-webkit-scrollbar {

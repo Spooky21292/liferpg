@@ -8,6 +8,7 @@
   display: flex;
   background: #000;
   border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 .nav-tab {
@@ -22,6 +23,7 @@
   transition: color 0.2s;
   font-family: 'Inter', sans-serif;
   letter-spacing: -0.01em;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .nav-tab:hover {
