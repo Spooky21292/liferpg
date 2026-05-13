@@ -1,10 +1,12 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import './LoginScreen.css'
 
 const GOOGLE_CLIENT_ID = '855103585243-fqcdk0a5ces4i1b1gfd1vafvhlcrmpcu.apps.googleusercontent.com'
+const TELEGRAM_BOT_NAME = 'liferrpg_app_bot'
 
 function LoginScreen({ onLogin, onAuthLogin, loading }) {
   const [username, setUsername] = useState('')
+  const tgRef = useRef(null)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -15,6 +17,13 @@ function LoginScreen({ onLogin, onAuthLogin, loading }) {
     if (response.credential) {
       onAuthLogin('google', response.credential)
     }
+  }, [onAuthLogin])
+
+  useEffect(() => {
+    window.onTelegramAuth = (tgUser) => {
+      onAuthLogin('telegram', tgUser)
+    }
+    return () => { delete window.onTelegramAuth }
   }, [onAuthLogin])
 
   useEffect(() => {
@@ -46,6 +55,21 @@ function LoginScreen({ onLogin, onAuthLogin, loading }) {
     }
   }, [handleGoogleResponse])
 
+  useEffect(() => {
+    if (!tgRef.current) return
+    const container = tgRef.current
+    container.innerHTML = ''
+    const script = document.createElement('script')
+    script.async = true
+    script.src = 'https://telegram.org/js/telegram-widget.js?22'
+    script.setAttribute('data-telegram-login', TELEGRAM_BOT_NAME)
+    script.setAttribute('data-size', 'large')
+    script.setAttribute('data-onauth', 'onTelegramAuth(user)')
+    script.setAttribute('data-request-access', 'write')
+    script.setAttribute('data-userpic', 'false')
+    container.appendChild(script)
+  }, [])
+
   return (
     <div className="login">
       <div className="login-content animate-in">
@@ -54,6 +78,7 @@ function LoginScreen({ onLogin, onAuthLogin, loading }) {
 
         <div className="login-auth">
           <div id="google-btn" className="google-btn-wrap"></div>
+          <div ref={tgRef} className="tg-btn-wrap"></div>
         </div>
 
         <div className="login-divider">

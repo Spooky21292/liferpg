@@ -4,6 +4,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
 
+import hashlib
+import hmac
+
 import httpx
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
@@ -36,6 +39,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 XP_PER_LEVEL = 200
 GOOGLE_CLIENT_ID = "855103585243-fqcdk0a5ces4i1b1gfd1vafvhlcrmpcu.apps.googleusercontent.com"
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "8701627127:AAGjCXMOgIhqwJhWqEbx0nki6BasnsCqAuc")
 
 
 def calculate_level(xp: int) -> int:
@@ -153,20 +157,38 @@ def google_auth(req: GoogleAuthRequest, db: Session = Depends(get_db)):
 
 class TelegramAuthRequest(BaseModel):
     id: int
-    first_name: str
+    first_name: str = ""
+    last_name: str = ""
     username: str = ""
+    photo_url: str = ""
+    auth_date: int
     hash: str
+
+
+def verify_telegram_hash(data: dict) -> bool:
+    check_hash = data.pop("hash", "")
+    data_check = "\n".join(f"{k}={v}" for k, v in sorted(data.items()) if v)
+    secret = hashlib.sha256(TELEGRAM_BOT_TOKEN.encode()).digest()
+    calculated = hmac.new(secret, data_check.encode(), hashlib.sha256).hexdigest()
+    return calculated == check_hash
 
 
 @app.post("/api/auth/telegram")
 def telegram_auth(req: TelegramAuthRequest, db: Session = Depends(get_db)):
+    auth_data = {k: v for k, v in req.model_dump().items() if v or k in ("id", "auth_date", "hash")}
+    auth_data["id"] = str(auth_data["id"])
+    auth_data["auth_date"] = str(auth_data["auth_date"])
+
+    if not verify_telegram_hash(dict(auth_data)):
+        raise HTTPException(status_code=401, detail="Invalid Telegram auth")
+
     telegram_id = str(req.id)
 
     user = db.query(User).filter(User.telegram_id == telegram_id).first()
     if user:
         return user_to_dict(user)
 
-    username = (req.username or req.first_name).replace(" ", "_")[:30]
+    username = (req.username or req.first_name or f"tg_{telegram_id}").replace(" ", "_")[:30]
     base = username
     counter = 1
     while db.query(User).filter(User.username == username).first():

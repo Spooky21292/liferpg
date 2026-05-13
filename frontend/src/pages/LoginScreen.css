@@ -90,6 +90,12 @@
   min-height: 44px;
 }
 
+.tg-btn-wrap {
+  display: flex;
+  justify-content: center;
+  min-height: 44px;
+}
+
 .login-divider {
   display: flex;
   align-items: center;
