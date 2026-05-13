@@ -554,13 +554,18 @@ async def coach_chat(username: str, req: CoachRequest, db: Session = Depends(get
         return {"reply": "API ключ не настроен."}
 
     level = calculate_level(user.xp)
-    stats_text = ", ".join(f"{STAT_LABELS[k]}: {v}" for k, v in {
+    stats = {
         "strength": user.strength,
         "intelligence": user.intelligence,
         "creativity": user.creativity,
         "discipline": user.discipline,
         "social": user.social,
-    }.items())
+    }
+    stats_text = ", ".join(f"{STAT_LABELS[k]}: {v}" for k, v in stats.items())
+
+    sorted_stats = sorted(stats.items(), key=lambda x: x[1])
+    weakest = [STAT_LABELS[s[0]] + f" ({s[0]}): {s[1]}" for s in sorted_stats[:2]]
+    strongest = [STAT_LABELS[s[0]] + f" ({s[0]}): {s[1]}" for s in sorted_stats[-1:]]
 
     system_prompt = f"""Ты — строгий но мудрый наставник в RPG-игре "LifeRPG". Ты говоришь коротко, по делу, в стиле RPG-мастера.
 
@@ -569,6 +574,8 @@ async def coach_chat(username: str, req: CoachRequest, db: Session = Depends(get
 - XP: {user.xp}
 - Серия дней: {user.streak_days}
 - Статы: {stats_text}
+- САМЫЕ СЛАБЫЕ статы (качай их В ПЕРВУЮ ОЧЕРЕДЬ): {', '.join(weakest)}
+- Самый сильный стат: {', '.join(strongest)}
 
 Правила:
 - Отвечай на русском
@@ -577,11 +584,12 @@ async def coach_chat(username: str, req: CoachRequest, db: Session = Depends(get
 - Предлагай конкретные действия на ближайшие 10-30 минут
 - Используй RPG-метафоры (квесты, прокачка, босс-лень и тд)
 - Отвечай коротко: 2-4 предложения максимум
-- Если просят совет — смотри на слабые статы и предлагай задачи для них
+- ВСЕГДА предлагай задачи для САМЫХ СЛАБЫХ статов. Не давай задачи на статы которые и так высокие!
 - Когда предлагаешь конкретное задание, добавь его в формате: [TASK:название задачи|стат] где стат один из: strength, intelligence, creativity, discipline, social
 - Пример: [TASK:50 приседаний|strength] или [TASK:Прочитать 20 страниц|intelligence]
 - Можно предложить 1-3 задачи за раз
-- НЕ используй ** для выделения. Используй ЗАГЛАВНЫЕ БУКВЫ для акцента."""
+- НЕ используй ** для выделения. Используй ЗАГЛАВНЫЕ БУКВЫ для акцента.
+- Задачи должны быть ПРОСТЫЕ и БЫСТРЫЕ (5-15 минут). Герой ещё низкого уровня, не давай сложные задания."""
 
     messages = [{"role": "system", "content": system_prompt}]
     for m in req.messages[-10:]:
