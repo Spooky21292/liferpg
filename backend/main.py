@@ -836,34 +836,20 @@ async def coach_chat(username: str, req: CoachRequest, db: Session = Depends(get
         return {"reply": "API ключ не настроен."}
 
     level = calculate_level(user.xp)
-    stats = {
-        "strength": user.strength,
-        "intelligence": user.intelligence,
-        "creativity": user.creativity,
-        "discipline": user.discipline,
-        "social": user.social,
-    }
-    stats_text = ", ".join(f"{STAT_LABELS[k]}: {v}" for k, v in stats.items())
 
     custom_stats = db.query(CustomStat).filter(CustomStat.user_id == user.id).all()
-    custom_stats_text = ""
-    custom_stat_keys = []
+
     if custom_stats:
-        custom_stats_text = "\n- Кастомные статы: " + ", ".join(f"{s.name} ({s.key}): {s.value}" for s in custom_stats)
-        custom_stat_keys = [s.key for s in custom_stats]
-
-    all_stats = list(stats.items()) + [(s.key, s.value) for s in custom_stats]
-    all_labels = dict(STAT_LABELS)
-    for s in custom_stats:
-        all_labels[s.key] = s.name
-
-    sorted_stats = sorted(all_stats, key=lambda x: x[1])
-    weakest = [all_labels.get(s[0], s[0]) + f" ({s[0]}): {s[1]}" for s in sorted_stats[:2]]
-    strongest = [all_labels.get(s[0], s[0]) + f" ({s[0]}): {s[1]}" for s in sorted_stats[-1:]]
-
-    all_stat_keys = "strength, intelligence, creativity, discipline, social"
-    if custom_stat_keys:
-        all_stat_keys += ", " + ", ".join(custom_stat_keys)
+        stats_text = ", ".join(f"{s.name} ({s.key}): {s.value}" for s in custom_stats)
+        all_stat_keys = ", ".join(s.key for s in custom_stats)
+        sorted_stats = sorted(custom_stats, key=lambda s: s.value)
+        weakest = [f"{s.name} ({s.key}): {s.value}" for s in sorted_stats[:2]]
+        strongest = [f"{s.name} ({s.key}): {s.value}" for s in sorted_stats[-1:]]
+    else:
+        stats_text = "Нет статов (герой ещё не добавил свои статы)"
+        all_stat_keys = "нет доступных статов"
+        weakest = ["нет"]
+        strongest = ["нет"]
 
     system_prompt = f"""Ты — строгий но мудрый наставник в RPG-игре "LifeRPG". Ты говоришь коротко, по делу, в стиле RPG-мастера.
 
@@ -871,7 +857,7 @@ async def coach_chat(username: str, req: CoachRequest, db: Session = Depends(get
 - Уровень: {level}
 - XP: {user.xp}
 - Серия дней: {user.streak_days}
-- Базовые статы: {stats_text}{custom_stats_text}
+- Статы героя: {stats_text}
 - САМЫЕ СЛАБЫЕ статы (качай их В ПЕРВУЮ ОЧЕРЕДЬ): {', '.join(weakest)}
 - Самый сильный стат: {', '.join(strongest)}
 
@@ -884,8 +870,8 @@ async def coach_chat(username: str, req: CoachRequest, db: Session = Depends(get
 - НЕ используй ** для выделения. Используй ЗАГЛАВНЫЕ БУКВЫ для акцента.
 - НЕ давай задания [TASK:...] если герой НЕ просит задания напрямую. Просто отвечай на вопрос, давай совет, мотивируй — БЕЗ задач.
 - Давай задания ТОЛЬКО когда герой ЯВНО просит: "дай задачу", "предложи задание", "что мне делать", "дай квест" и подобное.
+- Если у героя нет статов — предложи сначала добавить статы на странице Героя, а потом просить задачи.
 - Когда даёшь задания — предлагай для САМЫХ СЛАБЫХ статов в формате: [TASK:название|стат] где стат один из: {all_stat_keys}
-- Используй кастомные статы героя наравне с базовыми при подборе задач.
 - Стат со значением 0 — это НОВЫЙ стат, герой только начал его качать. Это нормально. Давай для него самые простые задания.
 - Задачи должны быть ПРОСТЫЕ и БЫСТРЫЕ (5-15 минут)."""
 

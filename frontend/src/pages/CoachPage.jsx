@@ -2,13 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { API } from '../config'
 import './CoachPage.css'
 
-const STAT_NAMES = {
-  strength: 'Сила',
-  intelligence: 'Интеллект',
-  creativity: 'Креативность',
-  discipline: 'Дисциплина',
-  social: 'Социальность',
-}
+
 
 function toLocalDate(d) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
@@ -45,7 +39,7 @@ function renderText(text) {
 }
 
 function CoachPage({ user, messages, setMessages, addedTasks, setAddedTasks }) {
-  const allStatNames = { ...STAT_NAMES }
+  const allStatNames = {}
   ;(user.custom_stats || []).forEach(cs => { allStatNames[cs.key] = cs.name })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)

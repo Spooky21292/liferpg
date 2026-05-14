@@ -2,21 +2,7 @@ import { useState, useEffect } from 'react'
 import { API } from '../config'
 import './TasksPage.css'
 
-const STATS = [
-  { id: 'strength', label: 'Сила' },
-  { id: 'intelligence', label: 'Интеллект' },
-  { id: 'creativity', label: 'Креативность' },
-  { id: 'discipline', label: 'Дисциплина' },
-  { id: 'social', label: 'Социальность' },
-]
 
-const STAT_NAMES = {
-  strength: 'Сила',
-  intelligence: 'Интеллект',
-  creativity: 'Креативность',
-  discipline: 'Дисциплина',
-  social: 'Социальность',
-}
 
 function toLocalDate(d) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
@@ -35,16 +21,15 @@ function formatDate(dateStr) {
 }
 
 function TasksPage({ user }) {
-  const customStats = (user.custom_stats || []).map(cs => ({ id: cs.key, label: cs.name }))
-  const allStats = [...STATS, ...customStats]
-  const allStatNames = { ...STAT_NAMES }
+  const allStats = (user.custom_stats || []).map(cs => ({ id: cs.key, label: cs.name }))
+  const allStatNames = {}
   ;(user.custom_stats || []).forEach(cs => { allStatNames[cs.key] = cs.name })
   const [tasks, setTasks] = useState([])
   const [selectedDate, setSelectedDate] = useState(toLocalDate(new Date()))
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [stat, setStat] = useState('discipline')
+  const [stat, setStat] = useState(allStats.length > 0 ? allStats[0].id : '')
   const [loading, setLoading] = useState(false)
 
   const fetchTasks = async () => {
