@@ -1,3 +1,5 @@
+import { useState } from 'react'
+import { API } from '../config'
 import './Dashboard.css'
 
 const STATS = [
@@ -8,8 +10,44 @@ const STATS = [
   { key: 'social', name: 'Социальность', icon: '◈' },
 ]
 
-function Dashboard({ user, onNavigate, onLogout }) {
+function Dashboard({ user, onNavigate, onLogout, refreshUser }) {
   const xpPercent = Math.min(100, (user.xp_current_level / user.xp_for_next) * 100)
+  const [showAdd, setShowAdd] = useState(false)
+  const [newName, setNewName] = useState('')
+  const [newIcon, setNewIcon] = useState('⚡')
+
+  const customStats = user.custom_stats || []
+
+  const addStat = async () => {
+    if (!newName.trim()) return
+    const form = new FormData()
+    form.append('name', newName.trim())
+    form.append('icon', newIcon)
+    try {
+      await fetch(`${API}/users/${encodeURIComponent(user.username)}/custom-stats`, {
+        method: 'POST',
+        body: form,
+      })
+      setNewName('')
+      setShowAdd(false)
+      if (refreshUser) refreshUser()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const deleteStat = async (statId) => {
+    try {
+      await fetch(`${API}/users/${encodeURIComponent(user.username)}/custom-stats/${statId}`, {
+        method: 'DELETE',
+      })
+      if (refreshUser) refreshUser()
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const icons = ['⚡', '◎', '✦', '→', '◈', '♦', '★', '▲', '●', '♠', '♣', '♥']
 
   return (
     <div className="dash page-scroll animate-in">
@@ -37,7 +75,7 @@ function Dashboard({ user, onNavigate, onLogout }) {
 
       {/* Stats */}
       <div className="stats-card">
-        {STATS.map(({ key, name, icon }, i) => (
+        {STATS.map(({ key, name, icon }) => (
           <div className="stat-row" key={key}>
             <span className="stat-icon">{icon}</span>
             <div className="stat-info">
@@ -54,7 +92,57 @@ function Dashboard({ user, onNavigate, onLogout }) {
             </div>
           </div>
         ))}
+
+        {customStats.map((cs) => (
+          <div className="stat-row" key={cs.key}>
+            <span className="stat-icon">{cs.icon}</span>
+            <div className="stat-info">
+              <div className="stat-top">
+                <span className="stat-name">{cs.name}</span>
+                <span className="stat-val mono">{cs.value}</span>
+              </div>
+              <div className="stat-track">
+                <div
+                  className="stat-bar"
+                  style={{ width: `${Math.min(100, cs.value * 5)}%` }}
+                />
+              </div>
+            </div>
+            <button className="stat-delete" onClick={() => deleteStat(cs.id)}>×</button>
+          </div>
+        ))}
       </div>
+
+      {/* Add custom stat */}
+      {!showAdd ? (
+        <button className="add-stat-btn" onClick={() => setShowAdd(true)}>
+          + Добавить стат
+        </button>
+      ) : (
+        <div className="add-stat-form">
+          <div className="icon-picker">
+            {icons.map(ic => (
+              <button
+                key={ic}
+                className={`icon-opt ${newIcon === ic ? 'selected' : ''}`}
+                onClick={() => setNewIcon(ic)}
+              >{ic}</button>
+            ))}
+          </div>
+          <input
+            type="text"
+            placeholder="Название стата"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            className="input"
+            maxLength={30}
+          />
+          <div className="add-stat-actions">
+            <button className="btn" onClick={addStat} disabled={!newName.trim()}>Добавить</button>
+            <button className="btn-cancel" onClick={() => { setShowAdd(false); setNewName('') }}>Отмена</button>
+          </div>
+        </div>
+      )}
 
       {/* CTA */}
       <button className="cta" onClick={() => onNavigate('quest')}>

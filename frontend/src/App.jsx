@@ -5,7 +5,6 @@ import QuestPage from './pages/QuestPage'
 import TasksPage from './pages/TasksPage'
 import CoachPage from './pages/CoachPage'
 import HistoryPage from './pages/HistoryPage'
-import StatsPage from './pages/StatsPage'
 import NavBar from './components/NavBar'
 import { API } from './config'
 import './App.css'
@@ -91,11 +90,11 @@ function App() {
   return (
     <div className="app-shell">
       <div className="app-content">
-        {page === 'dashboard' && <Dashboard user={user} onNavigate={setPage} onLogout={logout} />}
+        {page === 'dashboard' && <Dashboard user={user} onNavigate={setPage} onLogout={logout} refreshUser={refreshUser} />}
         {page === 'quest' && <QuestPage user={user} setUser={setUser} refreshUser={refreshUser} />}
         {page === 'tasks' && <TasksPage user={user} />}
         {page === 'coach' && <CoachPage user={user} messages={coachMessages} setMessages={setCoachMessages} addedTasks={coachAddedTasks} setAddedTasks={setCoachAddedTasks} />}
-        {page === 'stats' && <StatsPage user={user} />}
+        {page === 'history' && <HistoryPage user={user} />}
       </div>
       <NavBar currentPage={page} onNavigate={setPage} />
     </div>

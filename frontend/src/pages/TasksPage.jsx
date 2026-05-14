@@ -35,6 +35,10 @@ function formatDate(dateStr) {
 }
 
 function TasksPage({ user }) {
+  const customStats = (user.custom_stats || []).map(cs => ({ id: cs.key, label: cs.name }))
+  const allStats = [...STATS, ...customStats]
+  const allStatNames = { ...STAT_NAMES }
+  ;(user.custom_stats || []).forEach(cs => { allStatNames[cs.key] = cs.name })
   const [tasks, setTasks] = useState([])
   const [selectedDate, setSelectedDate] = useState(toLocalDate(new Date()))
   const [showForm, setShowForm] = useState(false)
@@ -122,7 +126,7 @@ function TasksPage({ user }) {
             <div className="task-info">
               <span className="task-name">{t.title}</span>
               <span className="task-meta mono">
-                +{t.xp} xp / {STAT_NAMES[t.stat] || t.stat}
+                +{t.xp} xp / {allStatNames[t.stat] || t.stat}
               </span>
             </div>
             <div className="task-actions">
@@ -155,7 +159,7 @@ function TasksPage({ user }) {
             onChange={(e) => setDescription(e.target.value)}
           />
           <div className="stat-row">
-            {STATS.map(s => (
+            {allStats.map(s => (
               <button
                 key={s.id}
                 className={`stat-btn ${stat === s.id ? 'active' : ''}`}

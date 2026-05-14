@@ -45,6 +45,8 @@ function renderText(text) {
 }
 
 function CoachPage({ user, messages, setMessages, addedTasks, setAddedTasks }) {
+  const allStatNames = { ...STAT_NAMES }
+  ;(user.custom_stats || []).forEach(cs => { allStatNames[cs.key] = cs.name })
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
   const bottomRef = useRef(null)
@@ -138,7 +140,7 @@ function CoachPage({ user, messages, setMessages, addedTasks, setAddedTasks }) {
                       <div key={j} className="task-suggest">
                         <div className="task-suggest-info">
                           <span className="task-suggest-title">{p.title}</span>
-                          <span className="task-suggest-stat mono">{STAT_NAMES[p.stat] || p.stat}</span>
+                          <span className="task-suggest-stat mono">{allStatNames[p.stat] || p.stat}</span>
                         </div>
                         <button
                           className={`task-suggest-btn ${added ? 'added' : ''}`}

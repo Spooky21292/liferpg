@@ -43,6 +43,7 @@ class User(Base):
     completed_tasks = relationship("CompletedTask", back_populates="user")
     inventory_items = relationship("InventoryItem", back_populates="user")
     user_tasks = relationship("UserTask", back_populates="user")
+    custom_stats = relationship("CustomStat", backref="user", cascade="all, delete-orphan")
 
 
 class CompletedTask(Base):
@@ -91,6 +92,18 @@ class UserTask(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="user_tasks")
+
+
+class CustomStat(Base):
+    __tablename__ = "custom_stats"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    key = Column(String(50), nullable=False)  # internal key like "health"
+    name = Column(String(100), nullable=False)  # display name like "Здоровье"
+    value = Column(Integer, default=1)
+    icon = Column(String(10), default="⚡")
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
 
 class StatSnapshot(Base):
