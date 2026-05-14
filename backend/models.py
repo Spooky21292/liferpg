@@ -101,7 +101,7 @@ class CustomStat(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     key = Column(String(50), nullable=False)  # internal key like "health"
     name = Column(String(100), nullable=False)  # display name like "Здоровье"
-    value = Column(Integer, default=1)
+    value = Column(Integer, default=0)
     icon = Column(String(10), default="⚡")
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 

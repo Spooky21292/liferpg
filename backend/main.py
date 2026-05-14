@@ -367,7 +367,7 @@ def create_custom_stat(username: str, name: str = Form(...), icon: str = Form("�
         key = f"{base_key}_{counter}"
         counter += 1
 
-    stat = CustomStat(user_id=user.id, key=key, name=name[:100], icon=icon[:10], value=1)
+    stat = CustomStat(user_id=user.id, key=key, name=name[:100], icon=icon[:10], value=0)
     db.add(stat)
     db.commit()
     db.refresh(stat)
@@ -886,6 +886,7 @@ async def coach_chat(username: str, req: CoachRequest, db: Session = Depends(get
 - Давай задания ТОЛЬКО когда герой ЯВНО просит: "дай задачу", "предложи задание", "что мне делать", "дай квест" и подобное.
 - Когда даёшь задания — предлагай для САМЫХ СЛАБЫХ статов в формате: [TASK:название|стат] где стат один из: {all_stat_keys}
 - Используй кастомные статы героя наравне с базовыми при подборе задач.
+- Стат со значением 0 — это НОВЫЙ стат, герой только начал его качать. Это нормально. Давай для него самые простые задания.
 - Задачи должны быть ПРОСТЫЕ и БЫСТРЫЕ (5-15 минут)."""
 
     messages = [{"role": "system", "content": system_prompt}]
