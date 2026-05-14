@@ -1,23 +1,8 @@
 import { useState, useEffect } from 'react'
+import { API } from '../config'
 import './TasksPage.css'
 
-const API = '/api'
 
-const STATS = [
-  { id: 'strength', label: 'Сила' },
-  { id: 'intelligence', label: 'Интеллект' },
-  { id: 'creativity', label: 'Креативность' },
-  { id: 'discipline', label: 'Дисциплина' },
-  { id: 'social', label: 'Социальность' },
-]
-
-const STAT_NAMES = {
-  strength: 'Сила',
-  intelligence: 'Интеллект',
-  creativity: 'Креативность',
-  discipline: 'Дисциплина',
-  social: 'Социальность',
-}
 
 function toLocalDate(d) {
   return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
@@ -36,12 +21,15 @@ function formatDate(dateStr) {
 }
 
 function TasksPage({ user }) {
+  const allStats = (user.custom_stats || []).map(cs => ({ id: cs.key, label: cs.name }))
+  const allStatNames = {}
+  ;(user.custom_stats || []).forEach(cs => { allStatNames[cs.key] = cs.name })
   const [tasks, setTasks] = useState([])
   const [selectedDate, setSelectedDate] = useState(toLocalDate(new Date()))
   const [showForm, setShowForm] = useState(false)
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
-  const [stat, setStat] = useState('discipline')
+  const [stat, setStat] = useState(allStats.length > 0 ? allStats[0].id : '')
   const [loading, setLoading] = useState(false)
 
   const fetchTasks = async () => {
@@ -96,7 +84,7 @@ function TasksPage({ user }) {
   const filteredTasks = tasks.filter(t => t.scheduled_date === selectedDate)
 
   return (
-    <div className="tasks-page animate-in">
+    <div className="tasks-page page-scroll animate-in">
       <h1 className="tasks-title">Задачи</h1>
 
       {/* Date selector */}
@@ -123,7 +111,7 @@ function TasksPage({ user }) {
             <div className="task-info">
               <span className="task-name">{t.title}</span>
               <span className="task-meta mono">
-                +{t.xp} xp / {STAT_NAMES[t.stat] || t.stat}
+                +{t.xp} xp / {allStatNames[t.stat] || t.stat}
               </span>
             </div>
             <div className="task-actions">
@@ -156,7 +144,7 @@ function TasksPage({ user }) {
             onChange={(e) => setDescription(e.target.value)}
           />
           <div className="stat-row">
-            {STATS.map(s => (
+            {allStats.map(s => (
               <button
                 key={s.id}
                 className={`stat-btn ${stat === s.id ? 'active' : ''}`}

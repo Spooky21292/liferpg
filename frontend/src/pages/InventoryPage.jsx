@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
+import { API } from '../config'
 import './InventoryPage.css'
-
-const API = '/api'
 
 function InventoryPage({ user, setUser, refreshUser }) {
   const [inventory, setInventory] = useState([])

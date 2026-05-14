@@ -1,7 +1,8 @@
 .coach-page {
   display: flex;
   flex-direction: column;
-  height: calc(100dvh - 52px);
+  height: 100%;
+  overflow: hidden;
 }
 
 .coach-header {

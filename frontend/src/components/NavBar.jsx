@@ -5,7 +5,7 @@ const tabs = [
   { id: 'quest', label: 'Квест' },
   { id: 'tasks', label: 'Задачи' },
   { id: 'coach', label: 'Коуч' },
-  { id: 'history', label: 'История' },
+  { id: 'stats', label: 'Стат' },
 ]
 
 function NavBar({ currentPage, onNavigate }) {
