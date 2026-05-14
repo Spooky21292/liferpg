@@ -1,7 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import { API } from '../config'
 import './QuestPage.css'
-
-const API = '/api'
 
 const STAT_NAMES = {
   strength: 'Сила',
@@ -80,11 +79,11 @@ function QuestPage({ user, setUser, refreshUser }) {
     setResult(null); setPhoto(null); setPhotoPreview(null); setComment('')
   }
 
-  if (loading) return <div className="quest-page"><p className="quest-empty">Загрузка...</p></div>
+  if (loading) return <div className="quest-page page-scroll"><p className="quest-empty">Загрузка...</p></div>
 
   if (data?.completed_all && (!data?.user_quests || data.user_quests.length === 0)) {
     return (
-      <div className="quest-page animate-in">
+      <div className="quest-page page-scroll animate-in">
         <div className="quest-done">
           <h2>Все главы пройдены</h2>
           <p>Добавь свои задачи во вкладке "Задачи"</p>
@@ -95,7 +94,7 @@ function QuestPage({ user, setUser, refreshUser }) {
 
   if (data?.chapter_complete && (!data?.user_quests || data.user_quests.length === 0)) {
     return (
-      <div className="quest-page animate-in">
+      <div className="quest-page page-scroll animate-in">
         <div className="quest-done">
           <h2>Глава пройдена</h2>
           <p>{data.chapter}</p>
@@ -108,7 +107,7 @@ function QuestPage({ user, setUser, refreshUser }) {
   // Active quest submission view
   if (activeQuest) {
     return (
-      <div className="quest-page animate-in">
+      <div className="quest-page page-scroll animate-in">
         <button className="back-btn" onClick={() => { setActiveQuest(null); resetSubmit() }}>
           &larr; Назад
         </button>
@@ -180,7 +179,7 @@ function QuestPage({ user, setUser, refreshUser }) {
   const chapterInfo = data?.chapter_info
 
   return (
-    <div className="quest-page animate-in">
+    <div className="quest-page page-scroll animate-in">
       {/* Story quest */}
       {storyQuest && chapterInfo && (
         <>

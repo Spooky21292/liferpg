@@ -91,3 +91,19 @@ class UserTask(Base):
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
 
     user = relationship("User", back_populates="user_tasks")
+
+
+class StatSnapshot(Base):
+    __tablename__ = "stat_snapshots"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    date = Column(String(10), nullable=False)  # YYYY-MM-DD
+    strength = Column(Integer, default=0)
+    intelligence = Column(Integer, default=0)
+    creativity = Column(Integer, default=0)
+    discipline = Column(Integer, default=0)
+    social = Column(Integer, default=0)
+    xp = Column(Integer, default=0)
+    level = Column(Integer, default=1)
+    tasks_completed = Column(Integer, default=0)

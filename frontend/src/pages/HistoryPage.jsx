@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
+import { API } from '../config'
 import './HistoryPage.css'
-
-const API = '/api'
 
 const STAT_NAMES = {
   strength: 'Сила',
@@ -22,10 +21,10 @@ function HistoryPage({ user }) {
       .catch(() => setLoading(false))
   }, [user.username])
 
-  if (loading) return <div className="history"><p className="history-empty">Загрузка...</p></div>
+  if (loading) return <div className="history page-scroll"><p className="history-empty">Загрузка...</p></div>
 
   return (
-    <div className="history animate-in">
+    <div className="history page-scroll animate-in">
       <h2 className="history-title">История</h2>
 
       {history.length === 0 && (

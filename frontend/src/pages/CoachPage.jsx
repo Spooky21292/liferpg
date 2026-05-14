@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
+import { API } from '../config'
 import './CoachPage.css'
-
-const API = '/api'
 
 const STAT_NAMES = {
   strength: 'Сила',

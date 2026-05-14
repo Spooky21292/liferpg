@@ -5,10 +5,10 @@ import QuestPage from './pages/QuestPage'
 import TasksPage from './pages/TasksPage'
 import CoachPage from './pages/CoachPage'
 import HistoryPage from './pages/HistoryPage'
+import StatsPage from './pages/StatsPage'
 import NavBar from './components/NavBar'
+import { API } from './config'
 import './App.css'
-
-const API = '/api'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -89,12 +89,14 @@ function App() {
   if (!user) return <LoginScreen onLogin={loginOrRegister} onAuthLogin={authLogin} loading={loading} />
 
   return (
-    <div>
-      {page === 'dashboard' && <Dashboard user={user} onNavigate={setPage} onLogout={logout} />}
-      {page === 'quest' && <QuestPage user={user} setUser={setUser} refreshUser={refreshUser} />}
-      {page === 'tasks' && <TasksPage user={user} />}
-      {page === 'coach' && <CoachPage user={user} messages={coachMessages} setMessages={setCoachMessages} addedTasks={coachAddedTasks} setAddedTasks={setCoachAddedTasks} />}
-      {page === 'history' && <HistoryPage user={user} />}
+    <div className="app-shell">
+      <div className="app-content">
+        {page === 'dashboard' && <Dashboard user={user} onNavigate={setPage} onLogout={logout} />}
+        {page === 'quest' && <QuestPage user={user} setUser={setUser} refreshUser={refreshUser} />}
+        {page === 'tasks' && <TasksPage user={user} />}
+        {page === 'coach' && <CoachPage user={user} messages={coachMessages} setMessages={setCoachMessages} addedTasks={coachAddedTasks} setAddedTasks={setCoachAddedTasks} />}
+        {page === 'stats' && <StatsPage user={user} />}
+      </div>
       <NavBar currentPage={page} onNavigate={setPage} />
     </div>
   )

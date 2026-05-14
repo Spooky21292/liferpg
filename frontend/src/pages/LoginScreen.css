@@ -109,6 +109,25 @@
   background: var(--border);
 }
 
+.google-native-btn {
+  width: 100%;
+  max-width: 320px;
+  padding: 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+
+.google-native-btn:hover {
+  border-color: var(--border-light);
+}
+
 .tg-login-btn {
   width: 100%;
   max-width: 320px;

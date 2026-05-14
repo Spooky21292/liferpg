@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
+import { API } from '../config'
 import './ShopPage.css'
-
-const API = '/api'
 
 const RARITY_ORDER = { common: 0, rare: 1, epic: 2, legendary: 3 }
 

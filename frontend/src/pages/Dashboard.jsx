@@ -12,7 +12,7 @@ function Dashboard({ user, onNavigate, onLogout }) {
   const xpPercent = Math.min(100, (user.xp_current_level / user.xp_for_next) * 100)
 
   return (
-    <div className="dash animate-in">
+    <div className="dash page-scroll animate-in">
       {/* Header */}
       <div className="dash-header">
         <div>

@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
+import { API } from '../config'
 import './TasksPage.css'
-
-const API = '/api'
 
 const STATS = [
   { id: 'strength', label: 'Сила' },
@@ -96,7 +95,7 @@ function TasksPage({ user }) {
   const filteredTasks = tasks.filter(t => t.scheduled_date === selectedDate)
 
   return (
-    <div className="tasks-page animate-in">
+    <div className="tasks-page page-scroll animate-in">
       <h1 className="tasks-title">Задачи</h1>
 
       {/* Date selector */}
